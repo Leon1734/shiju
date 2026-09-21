@@ -1,0 +1,121 @@
+<Window x:Class="QuoteWidget.Views.WidgetWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="拾句" Width="420" SizeToContent="Height"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Topmost="True" ShowInTaskbar="False" ShowActivated="False" ResizeMode="NoResize"
+        Focusable="False" WindowStartupLocation="Manual"
+        MouseLeftButtonDown="OnMouseDown" MouseMove="OnMouseMove"
+        MouseEnter="OnMouseEnter" MouseLeave="OnMouseLeave"
+        MouseWheel="OnMouseWheel">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Window.Resources>
+    <!-- 背景 #01000000：alpha=1 的"隐形可命中层"。透明窗口按像素 alpha 判定鼠标，
+         全透明区域会被系统穿透导致悬停控制条闪没，这层保证整个窗口区域都能响应鼠标 -->
+    <Grid x:Name="Root" MinHeight="76" Background="#01000000" RenderTransformOrigin="0.5,0.65">
+        <Grid.ContextMenu>
+            <ContextMenu x:Name="WidgetMenu" Opened="OnWidgetMenuOpened" Closed="OnWidgetMenuClosed">
+                <MenuItem Header="上一句" Click="OnPrevClick"/>
+                <MenuItem Header="下一句" Click="OnNextClick"/>
+                <MenuItem Header="随机换句" Click="OnRandomClick"/>
+                <MenuItem Header="今日一句" Click="OnDailyClick"/>
+                <Separator/>
+                <MenuItem x:Name="MenuFavItem" Header="收藏当前句子" Click="OnFavoriteClick"/>
+                <MenuItem Header="复制全文" Click="OnCopyClick"/>
+                <MenuItem Header="翻译当前句" Click="OnTranslateClick"/>
+                <MenuItem Header="翻译小窗（可用大模型引擎）" Click="OnMenuTranslateWindowClick"/>
+                <MenuItem Header="生成分享图" Click="OnShareClick"/>
+                <Separator/>
+                <MenuItem Header="收藏夹" Click="OnMenuFavorites"/>
+                <MenuItem Header="设置" Click="OnMenuSettings"/>
+                <Separator/>
+                <MenuItem Header="隐藏挂件" Click="OnMenuHide"/>
+                <MenuItem Header="退出" Click="OnMenuExit"/>
+            </ContextMenu>
+        </Grid.ContextMenu>
+        <Grid.RenderTransform>
+            <TransformGroup>
+                <TranslateTransform x:Name="RootTranslate" Y="0"/>
+                <ScaleTransform x:Name="RootScale" ScaleX="1" ScaleY="1"/>
+            </TransformGroup>
+        </Grid.RenderTransform>
+
+        <!-- 背景卡片：全透明模式下隐藏 -->
+        <Border x:Name="Card"
+                CornerRadius="16"
+                Background="#662D2D3A"
+                BorderThickness="1"
+                BorderBrush="#1AFFFFFF"
+                Visibility="Collapsed"/>
+
+        <!-- 节日角标 -->
+        <TextBlock x:Name="HolidayBadgeText" Text="{Binding HolidayBadge}"
+                   HorizontalAlignment="Right" VerticalAlignment="Top"
+                   Margin="0,6,8,0" FontSize="11" Opacity="0.8"/>
+
+        <StackPanel Margin="26,18,26,12">
+            <TextBlock x:Name="QuoteText"
+                       Text="{Binding Text}"
+                       TextWrapping="Wrap"
+                       TextAlignment="Center"
+                       FontSize="16"
+                       LineHeight="26"
+                       LineStackingStrategy="BlockLineHeight"
+                       HorizontalAlignment="Center"/>
+            <TextBlock x:Name="SourceText"
+                       Text="{Binding SourceDisplay}"
+                       TextAlignment="Right"
+                       FontSize="12"
+                       Opacity="0.75"
+                       Margin="0,8,2,0"/>
+            <TextBlock x:Name="TranslationText"
+                       Text="{Binding Translation}"
+                       TextWrapping="Wrap"
+                       TextAlignment="Center"
+                       FontSize="13"
+                       FontStyle="Italic"
+                       Margin="0,6,0,0"
+                       Visibility="{Binding HasTranslation, Converter={StaticResource BoolToVis}}"/>
+
+            <!-- 悬停控制条 -->
+            <WrapPanel x:Name="ControlBar"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        Margin="0,10,0,-2"
+                        Opacity="0"
+                        IsHitTestVisible="False">
+                <Button Content="◀ 上一句" Style="{StaticResource FlatButton}" Click="OnPrevClick"/>
+                <Button Content="{Binding FavoriteLabel}" Click="OnFavoriteClick">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource FlatButton}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                    <Setter Property="Foreground" Value="#FF7A93"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="随机" Style="{StaticResource FlatButton}" Click="OnRandomClick"/>
+                <Button Content="翻译" Style="{StaticResource FlatButton}" Click="OnOpenTranslateClick"
+                        ToolTip="在翻译小窗中翻译当前句（可用大模型引擎）"/>
+                <Button Content="复制" Style="{StaticResource FlatButton}" Click="OnCopyClick"/>
+                <Button Content="下一句 ▶" Style="{StaticResource FlatButton}" Click="OnNextClick"/>
+            </WrapPanel>
+        </StackPanel>
+
+        <!-- 轻提示气泡 -->
+        <Border x:Name="Toast"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Margin="0,0,0,4"
+                CornerRadius="10"
+                Background="#D9222333"
+                Padding="12,5"
+                Opacity="0"
+                IsHitTestVisible="False">
+            <TextBlock x:Name="ToastText" Foreground="White" FontSize="12"/>
+        </Border>
+    </Grid>
+</Window>

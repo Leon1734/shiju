@@ -1,0 +1,22 @@
+# 构建产物
+[bB]in/
+[Oo]bj/
+/release/
+
+# 用户本地文件
+*.user
+*.suo
+.vs/
+
+# 运行日志（在 %APPDATA%，不应出现，防呆）
+*.log
+
+# 临时调试工程
+tools/Dbg/
+tools/TestLogic/[bB]in/
+tools/TestLogic/[Oo]bj/
+tools/Tests/[bB]in/
+tools/Tests/[Oo]bj/
+
+# ZCode 会话内部文件
+.zcode/

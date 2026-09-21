@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>QuoteWidget</RootNamespace>
+    <AssemblyName>QuoteWidget</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+    <Version>2.3.3</Version>
+    <Product>拾句</Product>
+    <AssemblyTitle>拾句 - 桌面名言挂件</AssemblyTitle>
+    <Authors>WDL</Authors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\icon.ico" />
+    <Resource Include="Assets\quotes.json" />
+  </ItemGroup>
+
+  <!-- tools/ 下是独立运行的辅助工程（解析脚本、自测程序），不参与主程序编译 -->
+  <ItemGroup>
+    <Compile Remove="tools\**" />
+  </ItemGroup>
+
+  <!-- WPF 与 WinForms 混用：去掉 WinForms 的隐式全局 using，避免 Application/Color 等类型二义性 -->
+  <ItemGroup>
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+</Project>

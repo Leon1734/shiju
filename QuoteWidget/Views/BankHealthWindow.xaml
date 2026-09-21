@@ -1,0 +1,21 @@
+<Window x:Class="QuoteWidget.Views.BankHealthWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="词库体检 - 拾句" Width="640" Height="480" MinWidth="480" MinHeight="320"
+        WindowStartupLocation="CenterScreen" Background="#FAFAFC">
+    <DockPanel Margin="12">
+        <TextBlock x:Name="SummaryText" DockPanel.Dock="Top" Margin="0,0,0,8"
+                   FontSize="12" Foreground="#666" TextWrapping="Wrap"/>
+        <Border DockPanel.Dock="Bottom" Padding="0,10,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="打开词库文件夹" Style="{StaticResource DialogButton}" Margin="0"
+                        Click="OnOpenFolder" Cursor="Hand"/>
+                <Button Content="关闭" Style="{StaticResource DialogButton}" Click="OnClose" Cursor="Hand"/>
+            </StackPanel>
+        </Border>
+        <TextBlock x:Name="EmptyText" Text="体检通过，没有发现问题 🎉" Foreground="#4C9A6E"
+                   FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <ListBox x:Name="IssueList" BorderThickness="0" Background="Transparent"
+                 FontSize="13" MouseDoubleClick="OnIssueDoubleClick"/>
+    </DockPanel>
+</Window>

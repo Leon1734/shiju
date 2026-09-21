@@ -1,0 +1,1205 @@
+{
+ "version": 1,
+ "quotes": [
+  {
+   "id": "movie-001",
+   "text": "懦怯囚禁人的灵魂，希望让你感受自由。",
+   "source": "《肖申克的救赎》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-002",
+   "text": "忙着活，或忙着死。",
+   "source": "《肖申克的救赎》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-003",
+   "text": "人生就像一盒巧克力，你永远不知道下一块是什么味道。",
+   "source": "《阿甘正传》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-004",
+   "text": "说的是一辈子！差一年，一个月，一天，一个时辰，都不算一辈子！",
+   "source": "《霸王别姬》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-005",
+   "text": "曾经有一份真诚的爱情放在我面前，我没有珍惜，等我失去的时候我才后悔莫及。",
+   "source": "《大话西游》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-006",
+   "text": "你看那个人，他好像一条狗啊。",
+   "source": "《大话西游》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-007",
+   "text": "你跳，我就跳。",
+   "source": "《泰坦尼克号》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-008",
+   "text": "如果再也见不到你，祝你下午好，晚上好，晚安。",
+   "source": "《楚门的世界》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-009",
+   "text": "如果你有梦想的话，就要去捍卫它。",
+   "source": "《当幸福来敲门》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-010",
+   "text": "我会给他一个他无法拒绝的条件。",
+   "source": "《教父》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-011",
+   "text": "人生有一条路，每个人都要走，过去就无法回头。",
+   "source": "《千与千寻》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-012",
+   "text": "决定我们成为什么样的人，不是我们的能力，而是我们的选择。",
+   "source": "《哈利·波特与密室》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-013",
+   "text": "生活是否总是如此艰辛，还是仅仅在童年如此？——总是如此。",
+   "source": "《这个杀手不太冷》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-014",
+   "text": "爱是唯一可以超越时间与空间的事物。",
+   "source": "《星际穿越》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-015",
+   "text": "及时行乐，让你们的生命变得非同寻常。",
+   "source": "《死亡诗社》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-016",
+   "text": "每一颗心都需要爱，需要温柔，需要宽容，需要理解。",
+   "source": "《放牛班的春天》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-017",
+   "text": "陆地是一艘太大的船，是一个太长的旅程。",
+   "source": "《海上钢琴师》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-018",
+   "text": "无论如何，明天又是新的一天。",
+   "source": "《乱世佳人》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-019",
+   "text": "以前我没得选，现在我想做个好人。",
+   "source": "《无间道》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-020",
+   "text": "世界上有那么多的城镇，城镇中有那么多的酒馆，她却走进了我的。",
+   "source": "《卡萨布兰卡》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-021",
+   "text": "死亡不是生命的终点，遗忘才是。",
+   "source": "《寻梦环游记》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-022",
+   "text": "你要么作为英雄死去，要么活得足够长，看着自己变成恶棍。",
+   "source": "《蝙蝠侠：黑暗骑士》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-023",
+   "text": "不知道从什么时候开始，在什么东西上面都有个日期，秋刀鱼会过期，肉罐头会过期，连保鲜纸都会过期。",
+   "source": "《重庆森林》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-024",
+   "text": "过去伤痛固然存在，但依我来看，你要么逃避它，要么从中吸取教训。",
+   "source": "《狮子王》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-025",
+   "text": "黎耀辉，不如我们从头来过。",
+   "source": "《春光乍泄》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-026",
+   "text": "我们只是历史的副产品，没有目的，没有地位。",
+   "source": "《搏击俱乐部》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-027",
+   "text": "有许多事，我们无法改变，但我们可以改变自己。",
+   "source": "《黑客帝国》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-028",
+   "text": "我们无法决定自己的命运，我们能决定的只是在给定的时间里该做什么。",
+   "source": "《指环王》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-029",
+   "text": "不上班行不行？——不上班你养我啊？——我养你啊！",
+   "source": "《喜剧之王》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-030",
+   "text": "世间所有的相遇，都是久别重逢。",
+   "source": "《一代宗师》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-031",
+   "text": "有些人沦为平庸，有些人闪闪发光，但偶尔你会遇到一个彩虹般绚丽的人。",
+   "source": "《怦然心动》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-032",
+   "text": "这短短的一生，我们最终都会失去。你不妨大胆一些，爱一个人，攀一座山，追一个梦.",
+   "source": "《大鱼海棠》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-033",
+   "text": "探戈里无所谓错步，不像人生，它简单，所以才棒。",
+   "source": "《闻香识女人》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-034",
+   "text": "世界上有太多孤独的人，因为他们没有勇气迈出第一步。",
+   "source": "《绿皮书》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-035",
+   "text": "人生就是不断的放下，但最遗憾的是，我们来不及好好的告别。",
+   "source": "《少年派的奇幻漂流》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-036",
+   "text": "拯救一个人，就是拯救整个世界。",
+   "source": "《辛德勒的名单》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-037",
+   "text": "我希望我知道该如何戒掉你。",
+   "source": "《断背山》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-038",
+   "text": "释放无限光明的是人心，制造无边黑暗的也是人心。",
+   "source": "《悲惨世界》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-039",
+   "text": "如今我走到人生十字路口，我知道哪条路是对的，但我从不走，因为太苦了。",
+   "source": "《闻香识女人》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-040",
+   "text": "你好吗？我很好。",
+   "source": "《情书》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-041",
+   "text": "正义之路上的人，被暴虐和自私的恶人包围。",
+   "source": "《低俗小说》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-042",
+   "text": "站着，还把钱挣了.",
+   "source": "《让子弹飞》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-043",
+   "text": "要么读书，要么旅行，身体和灵魂总有一个在路上。",
+   "source": "《罗马假日》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-044",
+   "text": "因为我们的关系太脆弱了，每个人都是。",
+   "source": "《完美陌生人》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-045",
+   "text": "每当我对世界感到沮丧时，我就会想起入境大厅。爱其实无处不在。",
+   "source": "《真爱至上》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-046",
+   "text": "你可以像疯狗那样对周围的一切愤愤不平，你可以诅咒命运，但等到最后一刻，你还是得平静地放手。",
+   "source": "《本杰明·巴顿奇事》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-047",
+   "text": "不要只是活着，那不叫生活，那只是没有死去。",
+   "source": "《疯狂原始人》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-048",
+   "text": "它只是你生命的一部分，而你却是它的全部。",
+   "source": "《忠犬八公的故事》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-049",
+   "text": "为你，千千万万遍。",
+   "source": "《追风筝的人》",
+   "category": "movie"
+  },
+  {
+   "id": "movie-050",
+   "text": "感谢你陪我走过这段美丽的旅程，现在去开始你的新冒险吧。",
+   "source": "《飞屋环游记》",
+   "category": "movie"
+  },
+  {
+   "id": "game-001",
+   "text": "死亡如风，常伴吾身。",
+   "source": "亚索《英雄联盟》",
+   "category": "game"
+  },
+  {
+   "id": "game-002",
+   "text": "断剑重铸之日，骑士归来之时。",
+   "source": "锐雯《英雄联盟》",
+   "category": "game"
+  },
+  {
+   "id": "game-003",
+   "text": "不要错把仁慈当成软弱。",
+   "source": "艾希《英雄联盟》",
+   "category": "game"
+  },
+  {
+   "id": "game-004",
+   "text": "我用双手成就你的梦想。",
+   "source": "盲僧《英雄联盟》",
+   "category": "game"
+  },
+  {
+   "id": "game-005",
+   "text": "你的剑就是我的剑。",
+   "source": "易大师《英雄联盟》",
+   "category": "game"
+  },
+  {
+   "id": "game-006",
+   "text": "吾所成之事，不可逆也。",
+   "source": "劫《英雄联盟》",
+   "category": "game"
+  },
+  {
+   "id": "game-007",
+   "text": "我还以为你从来都不会选我呢。",
+   "source": "阿木木《英雄联盟》",
+   "category": "game"
+  },
+  {
+   "id": "game-008",
+   "text": "提莫队长正在待命！",
+   "source": "提莫《英雄联盟》",
+   "category": "game"
+  },
+  {
+   "id": "game-009",
+   "text": "我受够了跪倒在所谓的正义面前。",
+   "source": "莫甘娜《英雄联盟》",
+   "category": "game"
+  },
+  {
+   "id": "game-010",
+   "text": "生与死，轮回不止。我们生，他们死。",
+   "source": "内瑟斯《英雄联盟》",
+   "category": "game"
+  },
+  {
+   "id": "game-011",
+   "text": "均衡，存乎万物之间。",
+   "source": "慎《英雄联盟》",
+   "category": "game"
+  },
+  {
+   "id": "game-012",
+   "text": "王权没有永恒，我的父亲。",
+   "source": "阿尔萨斯《魔兽世界》",
+   "category": "game"
+  },
+  {
+   "id": "game-013",
+   "text": "你们这是自寻死路！",
+   "source": "伊利丹《魔兽世界》",
+   "category": "game"
+  },
+  {
+   "id": "game-014",
+   "text": "兽人永不为奴！",
+   "source": "格罗玛什《魔兽世界》",
+   "category": "game"
+  },
+  {
+   "id": "game-015",
+   "text": "战争，战争从未改变。",
+   "source": "《辐射》",
+   "category": "game"
+  },
+  {
+   "id": "game-016",
+   "text": "万物皆虚，万物皆允。",
+   "source": "《刺客信条》",
+   "category": "game"
+  },
+  {
+   "id": "game-017",
+   "text": "非凡之人，由于追寻非凡之事而成就。",
+   "source": "劳拉《古墓丽影》",
+   "category": "game"
+  },
+  {
+   "id": "game-018",
+   "text": "既不回头，何必不忘。既然无缘，何须誓言。",
+   "source": "《仙剑奇侠传》",
+   "category": "game"
+  },
+  {
+   "id": "game-019",
+   "text": "如果我要在两个恶魔之间做出选择，我宁愿两个都不选。",
+   "source": "杰洛特《巫师3：狂猎》",
+   "category": "game"
+  },
+  {
+   "id": "game-020",
+   "text": "我们是贼，在一个不再需要我们的世界里。",
+   "source": "亚瑟《荒野大镖客：救赎2》",
+   "category": "game"
+  },
+  {
+   "id": "game-021",
+   "text": "错的不是你，是这个世界。",
+   "source": "强尼·银手《赛博朋克2077》",
+   "category": "game"
+  },
+  {
+   "id": "game-022",
+   "text": "醒醒，武侍，我们把这座城市烧成灰。",
+   "source": "强尼·银手《赛博朋克2077》",
+   "category": "game"
+  },
+  {
+   "id": "game-023",
+   "text": "踏过三界宝刹，阅过四洲繁华，笑过众生痴妄，恶过诸般虚妄。",
+   "source": "《黑神话：悟空》",
+   "category": "game"
+  },
+  {
+   "id": "game-024",
+   "text": "褪色者啊，向着艾尔登法环前进吧。",
+   "source": "《艾尔登法环》",
+   "category": "game"
+  },
+  {
+   "id": "game-025",
+   "text": "愿薪火相传。",
+   "source": "《黑暗之魂》",
+   "category": "game"
+  },
+  {
+   "id": "game-026",
+   "text": "挺起胸膛，你是光之战士。",
+   "source": "《最终幻想15》",
+   "category": "game"
+  },
+  {
+   "id": "game-027",
+   "text": "这个世界需要更多英雄！",
+   "source": "《守望先锋》",
+   "category": "game"
+  },
+  {
+   "id": "game-028",
+   "text": "恐惧，源于未知。",
+   "source": "《生化危机》",
+   "category": "game"
+  },
+  {
+   "id": "game-029",
+   "text": "你每天都会忘记成千上万件事，何不把这件事也忘了？",
+   "source": "《侠盗猎车手5》",
+   "category": "game"
+  },
+  {
+   "id": "game-030",
+   "text": "大河之水天上来！",
+   "source": "李白《王者荣耀》",
+   "category": "game"
+  },
+  {
+   "id": "game-031",
+   "text": "智商太低会传染，离我远点。",
+   "source": "诸葛亮《王者荣耀》",
+   "category": "game"
+  },
+  {
+   "id": "game-032",
+   "text": "不要觉得抱歉，要做到更好。",
+   "source": "奎托斯《战神》",
+   "category": "game"
+  },
+  {
+   "id": "game-033",
+   "text": "伟大的成就往往源于微不足道的开始。",
+   "source": "《神秘海域》",
+   "category": "game"
+  },
+  {
+   "id": "game-034",
+   "text": "我们的存在，不是因为我们完美，而是因为我们有选择。",
+   "source": "《底特律：变人》",
+   "category": "game"
+  },
+  {
+   "id": "game-035",
+   "text": "向未知进发，这是人类的宿命。",
+   "source": "《质量效应》",
+   "category": "game"
+  },
+  {
+   "id": "game-036",
+   "text": "绳索连接世界，而弩箭将人分开。",
+   "source": "《死亡搁浅》",
+   "category": "game"
+  },
+  {
+   "id": "game-037",
+   "text": "如果最后我们没有在月球相遇，我也一定会找到你。",
+   "source": "《去月球》",
+   "category": "game"
+  },
+  {
+   "id": "game-038",
+   "text": "人选择，奴隶服从。",
+   "source": "《生化奇兵：无限》",
+   "category": "game"
+  },
+  {
+   "id": "game-039",
+   "text": "无论发生什么，你都要找到值得为之奋斗的东西。",
+   "source": "乔尔《最后生还者》",
+   "category": "game"
+  },
+  {
+   "id": "game-040",
+   "text": "虽然你终将离去，但这个世界会记得你来过。",
+   "source": "《我的世界》",
+   "category": "game"
+  },
+  {
+   "id": "game-041",
+   "text": "没有声音可以哭泣，没有意志可以动摇。",
+   "source": "《空洞骑士》",
+   "category": "game"
+  },
+  {
+   "id": "game-042",
+   "text": "速度不仅是激情，更是掌控。",
+   "source": "《极品飞车》",
+   "category": "game"
+  },
+  {
+   "id": "game-043",
+   "text": "为世界上所有的美好而战！",
+   "source": "《崩坏3》",
+   "category": "game"
+  },
+  {
+   "id": "game-044",
+   "text": "欲买桂花同载酒，终不似，少年游。",
+   "source": "钟离《原神》",
+   "category": "game"
+  },
+  {
+   "id": "game-045",
+   "text": "我只是一个被历史遗忘的旧时代残党。",
+   "source": "《合金装备》",
+   "category": "game"
+  },
+  {
+   "id": "game-046",
+   "text": "欢迎回来，指挥官。",
+   "source": "《红色警戒2》",
+   "category": "game"
+  },
+  {
+   "id": "game-047",
+   "text": "在错误的地方做出正确的选择，可以改变世界的走向。",
+   "source": "G-Man《半条命》",
+   "category": "game"
+  },
+  {
+   "id": "game-048",
+   "text": "历史是由胜利者书写的。",
+   "source": "普莱斯《使命召唤：现代战争》",
+   "category": "game"
+  },
+  {
+   "id": "game-049",
+   "text": "这让你充满了决心。",
+   "source": "《Undertale》",
+   "category": "game"
+  },
+  {
+   "id": "game-050",
+   "text": "为了艾尔，为了虫群。",
+   "source": "《星际争霸》",
+   "category": "game"
+  },
+  {
+   "id": "novel-001",
+   "text": "给岁月以文明，而不是给文明以岁月。",
+   "source": "刘慈欣《三体》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-002",
+   "text": "弱小和无知不是生存的障碍，傲慢才是。",
+   "source": "刘慈欣《三体》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-003",
+   "text": "失去人性，失去很多；失去兽性，失去一切。",
+   "source": "刘慈欣《三体》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-004",
+   "text": "无论走到哪里，都应该记住，过去都是假的，回忆是一条没有尽头的路。",
+   "source": "马尔克斯《百年孤独》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-005",
+   "text": "真正重要的东西，用眼睛是看不见的。",
+   "source": "圣埃克苏佩里《小王子》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-006",
+   "text": "这是最好的时代，这是最坏的时代。",
+   "source": "狄更斯《双城记》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-007",
+   "text": "人是为了活着本身而活着的，而不是为了活着之外的任何事物所活着。",
+   "source": "余华《活着》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-008",
+   "text": "满纸荒唐言，一把辛酸泪！都云作者痴，谁解其中味？",
+   "source": "曹雪芹《红楼梦》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-009",
+   "text": "城外的人想冲进去，城里的人想逃出来。",
+   "source": "钱钟书《围城》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-010",
+   "text": "生存还是毁灭，这是一个值得考虑的问题。",
+   "source": "莎士比亚《哈姆雷特》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-011",
+   "text": "满地都是六便士，他却抬头看见了月亮。",
+   "source": "毛姆《月亮与六便士》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-012",
+   "text": "为你，千千万万遍。",
+   "source": "卡勒德·胡赛尼《追风筝的人》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-013",
+   "text": "我的天空里没有太阳，总是黑夜，但并不暗，因为有东西代替了太阳。",
+   "source": "东野圭吾《白夜行》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-014",
+   "text": "其实我们每个人的生活都是一个世界，即使最平凡的人也要为他生活的那个世界而奋斗。",
+   "source": "路遥《平凡的世界》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-015",
+   "text": "一个人可以被毁灭，但不能被打败。",
+   "source": "海明威《老人与海》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-016",
+   "text": "你以为我贫穷、低微、不美、渺小，我就没有灵魂，没有心吗？",
+   "source": "夏洛蒂·勃朗特《简·爱》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-017",
+   "text": "每逢你想要批评任何人的时候，你就记住，这个世界上所有的人，并不是个个都有过你拥有的那些优越条件。",
+   "source": "菲茨杰拉德《了不起的盖茨比》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-018",
+   "text": "哪个少年不钟情，哪个少女不怀春。",
+   "source": "歌德《少年维特的烦恼》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-019",
+   "text": "幸福的家庭都是相似的，不幸的家庭各有各的不幸。",
+   "source": "托尔斯泰《安娜·卡列尼娜》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-020",
+   "text": "真的猛士，敢于直面惨淡的人生，敢于正视淋漓的鲜血。",
+   "source": "鲁迅《记念刘和珍君》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-021",
+   "text": "极端的美往往和极端的丑紧密相连。",
+   "source": "雨果《巴黎圣母院》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-022",
+   "text": "人类的一切智慧都包含在这四个字里面：“等待”和“希望”。",
+   "source": "大仲马《基督山伯爵》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-023",
+   "text": "一天早晨，格里高尔·萨姆沙从不安的睡梦中醒来，发现自己躺在床上变成了一只巨大的甲虫。",
+   "source": "卡夫卡《变形记》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-024",
+   "text": "我要做一个麦田里的守望者。",
+   "source": "塞林格《麦田里的守望者》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-025",
+   "text": "如果你认识以前的我，也许你会原谅现在的我。",
+   "source": "张爱玲《倾城之恋》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-026",
+   "text": "我横竖睡不着，仔细看了半夜，才从字缝里看出字来，满本都写着两个字是“吃人”！",
+   "source": "鲁迅《狂人日记》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-027",
+   "text": "凡是有钱的单身汉，总想娶位太太，这已经成了一条举世公认的真理。",
+   "source": "奥斯汀《傲慢与偏见》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-028",
+   "text": "负担越重，我们的生命越贴近大地，它就越真切实在。",
+   "source": "米兰·昆德拉《不能承受的生命之轻》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-029",
+   "text": "这个人也许永远不回来了，也许“明天”回来！",
+   "source": "沈从文《边城》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-030",
+   "text": "能享福也能受罪，能屈也能伸。",
+   "source": "陈忠实《白鹿原》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-031",
+   "text": "老大哥在看着你。",
+   "source": "乔治·奥威尔《1984》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-032",
+   "text": "生而为人，我很抱歉。",
+   "source": "太宰治《人间失格》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-033",
+   "text": "我们终其一生，就是要摆脱他人的期待，找到真正的自己。",
+   "source": "伍绮诗《无声告白》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-034",
+   "text": "洛丽塔，我生命之光，我欲念之火。我的罪恶，我的灵魂。",
+   "source": "纳博科夫《洛丽塔》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-035",
+   "text": "死并非生的对立面，而作为生的一部分永存。",
+   "source": "村上春树《挪威的森林》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-036",
+   "text": "正因为走过漫长的泥泞道路，才更能体会到终点的喜悦。",
+   "source": "东野圭吾《解忧杂货店》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-037",
+   "text": "在充满着体面的社会里，只有说谎才能生活。",
+   "source": "司汤达《红与黑》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-038",
+   "text": "当我沉默着的时候，我觉得充实；我将开口，同时感到空虚。",
+   "source": "鲁迅《野草》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-039",
+   "text": "皇帝轮流做，明年到我家。",
+   "source": "吴承恩《西游记》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-040",
+   "text": "滚滚长江东逝水，浪花淘尽英雄。是非成败转头空。",
+   "source": "罗贯中《三国演义》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-041",
+   "text": "路见不平，拔刀相助。",
+   "source": "施耐庵《水浒传》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-042",
+   "text": "三十年前的月亮早已沉下去，三十年前的人也死了，然而三十年前的故事还没完。",
+   "source": "张爱玲《金锁记》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-043",
+   "text": "爱情，是人类最美好的情感，当它油然而生时，它是那样的纯洁。",
+   "source": "霍达《穆斯林的葬礼》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-044",
+   "text": "生如夏花之绚烂，死如秋叶之静美。",
+   "source": "泰戈尔《飞鸟集》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-045",
+   "text": "那一天我二十一岁，在我一生的黄金时代。我有好多奢望。我想爱，想吃，还想在一瞬间变成天上半明半暗的云。",
+   "source": "王小波《黄金时代》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-046",
+   "text": "闲时与你立黄昏，灶前笑问粥可温。",
+   "source": "沈复《浮生六记》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-047",
+   "text": "生活就是这样，要想活下去，就得向更强大的力量低头。",
+   "source": "杰克·伦敦《白牙》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-048",
+   "text": "当你排所有的不可能，无论剩下的是什么，即使再不可思议，那也是真相。",
+   "source": "柯南·道尔《福尔摩斯探案集》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-049",
+   "text": "我爱咱们的国呀，可谁爱咱们呀？",
+   "source": "老舍《茶馆》",
+   "category": "novel"
+  },
+  {
+   "id": "novel-050",
+   "text": "不要恐慌。",
+   "source": "道格拉斯·亚当斯《银河系漫游指南》",
+   "category": "novel"
+  },
+  {
+   "id": "lyric-001",
+   "text": "刮风这天我试过握着你手，但偏偏雨渐渐大到我看你不见。",
+   "source": "周杰伦《晴天》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-002",
+   "text": "十年之前，我不认识你，你不属于我，我们还是一样，陪在一个陌生人左右。",
+   "source": "陈奕迅《十年》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-003",
+   "text": "原谅我这一生不羁放纵爱自由，也会怕有一天会跌倒。",
+   "source": "Beyond《海阔天空》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-004",
+   "text": "我曾经跨过山和大海，也穿过人山人海，我曾经拥有着一切，转眼都飘散如烟。",
+   "source": "朴树《平凡之路》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-005",
+   "text": "当我和世界不一样，那就让我不一样，坚持对我来说就是以刚克刚。",
+   "source": "五月天《倔强》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-006",
+   "text": "修炼爱情的心酸，学会放手、低头、承载，奔向各自的幸福。",
+   "source": "林俊杰《修炼爱情》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-007",
+   "text": "越过山丘，才发现无人等候。喋喋不休，再也唤不回温柔。",
+   "source": "李宗盛《山丘》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-008",
+   "text": "有时候，有时候，我会相信一切有尽头，相聚离开都有时候，没有什么会永垂不朽。",
+   "source": "王菲《红豆》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-009",
+   "text": "我会牢牢记住你的脸，我会珍惜你给的思念。",
+   "source": "张震岳《再见》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-010",
+   "text": "没有什么能够阻挡，你对自由的向往。",
+   "source": "许巍《蓝莲花》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-011",
+   "text": "一杯敬朝阳，一杯敬月光，唤醒我的向往，温柔了寒窗。",
+   "source": "毛不易《消愁》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-012",
+   "text": "缘分让我们相遇乱世以外，命运却要我们危难中相爱。",
+   "source": "邓紫棋《光年之外》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-013",
+   "text": "池塘边的榕树上，知了在声声叫着夏天。",
+   "source": "罗大佑《童年》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-014",
+   "text": "你知道，就算大雨让这座城市颠倒，我会给你怀抱。",
+   "source": "苏打绿《小情歌》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-015",
+   "text": "我和你吻别，在无人的街，让风痴笑我不能拒绝。",
+   "source": "张学友《吻别》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-016",
+   "text": "后来，我总算学会了如何去爱。可惜你早已远去，消失在人海。",
+   "source": "刘若英《后来》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-017",
+   "text": "朋友一生一起走，那些日子不再有。一句话，一辈子，一生情，一杯酒。",
+   "source": "周华健《朋友》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-018",
+   "text": "我就是我，是颜色不一样的烟火。天大地大，用孤独倔强。",
+   "source": "张国荣《我》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-019",
+   "text": "我遇见谁会有怎样的对白，我等的人他在多远的未来。",
+   "source": "孙燕姿《遇见》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-020",
+   "text": "每当我找不到存在的意义，每当我迷失在黑夜里，夜空中最亮的星，请指引我靠近你。",
+   "source": "逃跑计划《夜空中最亮的星》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-021",
+   "text": "把所有的烈酒留给孤独的自己，我说所有的酒，都不如你。",
+   "source": "鹿先森乐队《春风十里》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-022",
+   "text": "让我掉下眼泪的，不止昨夜的酒。让我依依不舍的，不止你的温柔。",
+   "source": "赵雷《成都》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-023",
+   "text": "这是我们的时代，没有人能改变。",
+   "source": "新裤子《我们的时代》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-024",
+   "text": "我知道，那些夏天就像青春一样回不来，代替梦想的也只能是勉为其难。",
+   "source": "宋冬野《安和桥》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-025",
+   "text": "该配合你演出的我演视而不见，在逼一个最爱你的人即兴表演。",
+   "source": "薛之谦《演员》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-026",
+   "text": "是否找个借口继续苟活，或是展翅高飞保持愤怒。",
+   "source": "汪峰《存在》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-027",
+   "text": "我曾经问个不休，你何时跟我走，可你却总是笑我，一无所有。",
+   "source": "崔健《一无所有》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-028",
+   "text": "终于看开爱回不来，我们面前太多空白。",
+   "source": "蔡依林《倒带》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-029",
+   "text": "雨下整夜，我的爱溢出就像雨水。院子落叶，跟我的思念厚厚一叠。",
+   "source": "周杰伦《七里香》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-030",
+   "text": "阴天，在不开灯的房间，当所有思绪都一点一点沉淀。",
+   "source": "莫文蔚《阴天》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-031",
+   "text": "女人若没人爱多可悲，就算是有人听我的流泪。",
+   "source": "林忆莲《伤痕》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-032",
+   "text": "我爱你不放弃，这爱的甜言蜜语。",
+   "source": "陶喆《爱很简单》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-033",
+   "text": "爱真的需要勇气，来面对流言蜚语。",
+   "source": "梁静茹《勇气》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-034",
+   "text": "你妈没有告诉你，撞到人要说对不起。",
+   "source": "告五人《爱人错过》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-035",
+   "text": "如此生活三十年，直到大厦崩塌。",
+   "source": "万能青年旅店《杀死那个石家庄人》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-036",
+   "text": "如何掉眼泪，自知身份都不对。",
+   "source": "杨千嬅《可惜我是水瓶座》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-037",
+   "text": "我看过沙漠下暴雨，看过大海亲吻鲨鱼，看过黄昏追逐黎明，没看过你。",
+   "source": "陈粒《奇妙能力歌》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-038",
+   "text": "只是因为在人群中多看了你一眼，再也没能忘掉你容颜。",
+   "source": "李健《传奇》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-039",
+   "text": "哭啊，喊啊，乖乖请你跪下。",
+   "source": "草东没有派对《大风吹》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-040",
+   "text": "至少我们中还有人能快乐，这样就足够了。",
+   "source": "方大同《三人游》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-041",
+   "text": "死了都要爱，不淋漓尽致不痛快。",
+   "source": "信乐团《死了都要爱》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-042",
+   "text": "乌蒙山连着山外山，月光洒下了响水滩。",
+   "source": "凤凰传奇《奢香夫人》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-043",
+   "text": "让我将你心儿摘下，试着将它慢慢融化。",
+   "source": "伍佰《挪威的森林》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-044",
+   "text": "向前跑，迎着冷眼和嘲笑，生命的广阔不历经磨难怎能感到。",
+   "source": "GALA《追梦赤子心》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-045",
+   "text": "时光时光慢些吧，不要再让你变老了。",
+   "source": "筷子兄弟《父亲》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-046",
+   "text": "只有我，守着安静的沙漠，等待着花开。",
+   "source": "华晨宇《烟火里的尘埃》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-047",
+   "text": "苦海翻起爱恨，在世间难逃避命运。",
+   "source": "卢冠廷《一生所爱》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-048",
+   "text": "命运就算颠沛流离，命运就算曲折离奇，命运就算恐吓生涯，大步走向前。",
+   "source": "李克勤《红日》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-049",
+   "text": "你就是我的唯一，两个世界都变形。",
+   "source": "王力宏《唯一》",
+   "category": "lyric"
+  },
+  {
+   "id": "lyric-050",
+   "text": "因为有像你这样的人活在世上，我开始对这个世界稍微有了期待。",
+   "source": "中岛美嘉《曾经我也想过一了百了》",
+   "category": "lyric"
+  }
+ ]
+}

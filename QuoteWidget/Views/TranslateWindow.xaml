@@ -1,0 +1,31 @@
+<Window x:Class="QuoteWidget.Views.TranslateWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="翻译 - 拾句" Width="560" Height="470" MinWidth="440" MinHeight="360"
+        WindowStartupLocation="CenterScreen" Background="#FAFAFC">
+    <DockPanel Margin="12">
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+            <TextBlock Text="翻译引擎" VerticalAlignment="Center" FontSize="13" Foreground="#44444E"/>
+            <ComboBox x:Name="EngineCombo" Width="170" Margin="8,0,0,0" FontSize="12"/>
+            <Button Content="翻 译" Style="{StaticResource DialogButton}" Margin="10,0,0,0"
+                    Click="OnTranslate" Cursor="Hand"/>
+            <Button Content="复制结果" Style="{StaticResource DialogButton}" Click="OnCopyResult" Cursor="Hand"/>
+            <Button Content="清空" Style="{StaticResource DialogButton}" Click="OnClear" Cursor="Hand"/>
+            <Button Content="⚙ API 设置" Style="{StaticResource DialogButton}" Click="OnOpenApiSettings" Cursor="Hand"
+                    ToolTip="打开设置并定位到翻译引擎，可填写各引擎 API Key"/>
+        </StackPanel>
+
+        <TextBlock x:Name="StatusText" DockPanel.Dock="Bottom" FontSize="11"
+                   Foreground="#8A8A93" Margin="0,6,0,0" TextWrapping="Wrap"/>
+
+        <TextBox x:Name="OutputBox" DockPanel.Dock="Bottom" Height="150" Margin="0,8,0,0"
+                 IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                 FontSize="14" Background="White" BorderBrush="#D8D8E0" Padding="8"/>
+
+        <TextBox x:Name="InputBox" TextWrapping="Wrap" AcceptsReturn="True"
+                 VerticalScrollBarVisibility="Auto" FontSize="14"
+                 VerticalContentAlignment="Top" Background="White"
+                 BorderBrush="#D8D8E0" Padding="8"
+                 KeyDown="OnInputKeyDown"/>
+    </DockPanel>
+</Window>
