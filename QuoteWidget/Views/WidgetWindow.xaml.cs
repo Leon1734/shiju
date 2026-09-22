@@ -234,7 +234,7 @@ public partial class WidgetWindow : Window
         if (_busyStreak < 2) return;
         _busyStreak = 0;
         _hiddenByFullscreen = true;
-        Log.Info($"fullscreen: 检测到全屏应用（state={FullscreenWatcher.QueryState()}），挂件自动隐藏");
+        Log.Info($"fullscreen: 检测到全屏应用（state={FullscreenWatcher.QueryState()}，{FullscreenWatcher.DescribeForeground()}），挂件自动隐藏");
         Hide();
     }
 
@@ -271,7 +271,8 @@ public partial class WidgetWindow : Window
         catch { }
     }
 
-    /// <summary>可见性联动：隐藏时停掉定时器/动画，显示时恢复。</summary>
+    /// <summary>可见性联动：隐藏时停掉换句/心跳等定时器省电。
+    /// 注意：全屏检测定时器不能停——否则被自动隐藏后就没有人来恢复显示了（曾经的死锁 bug）。</summary>
     private void SetActive(bool active)
     {
         if (active)
@@ -284,9 +285,9 @@ public partial class WidgetWindow : Window
         {
             _autoTimer.Stop();
             _minuteTimer.Stop();
-            _fullscreenTimer.Stop();
             _toastTimer.Stop();
             StopTypewriter();
+            // _fullscreenTimer 继续运行：它是自动隐藏后唯一能恢复显示的机制
         }
     }
 

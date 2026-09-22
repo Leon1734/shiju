@@ -11,7 +11,7 @@
     <AssemblyName>QuoteWidget</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
-    <Version>2.4.1</Version>
+    <Version>2.4.2</Version>
     <Product>拾句</Product>
     <AssemblyTitle>拾句 - 桌面名言挂件</AssemblyTitle>
     <Authors>WDL</Authors>

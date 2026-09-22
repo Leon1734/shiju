@@ -62,7 +62,7 @@ public class AppSettings : INotifyPropertyChanged
     private Dictionary<string, int> _bankSchedules = new();
 
     private string _translateEngine = "Zhipu";
-    private string _zhipuApiKey = "在这里填入你的智谱APIKey";
+    private string _zhipuApiKey = "0ea55f07c1ea418e829384dc15961abc.A26col9FcpE2clCq";
     private string _siliconApiKey = "";
     private string _siliconModel = "Qwen/Qwen2.5-7B-Instruct";
     private string _deepseekApiKey = "";
@@ -275,7 +275,7 @@ public class AppSettings : INotifyPropertyChanged
         TranslateEngine = "Zhipu";
         EngineUrls.Clear();
         EngineModels.Clear();
-        ZhipuApiKey = "在这里填入你的智谱APIKey";
+        ZhipuApiKey = "0ea55f07c1ea418e829384dc15961abc.A26col9FcpE2clCq";
 
         AutostartDelaySeconds = 0;
         FoldMultiLine = false;

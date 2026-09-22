@@ -39,6 +39,7 @@ public static class FullscreenWatcher
     [DllImport("user32.dll")] private static extern IntPtr GetForegroundWindow();
     [DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr hWnd, out RECT rect);
     [DllImport("user32.dll")] private static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT placement);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern int GetWindowTextW(IntPtr hWnd, StringBuilder sb, int max);
     [DllImport("user32.dll")] private static extern IntPtr MonitorFromWindow(IntPtr hWnd, uint flags);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern int GetClassNameW(IntPtr hWnd, StringBuilder sb, int max);
     [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint pid);
@@ -54,6 +55,28 @@ public static class FullscreenWatcher
         if (quns is 3 or 4) return true;
 
         return IsForegroundTrulyFullscreen();
+    }
+
+    /// <summary>描述当前前台窗口（类名/标题/位置/最大化状态），用于隐藏时写日志定位误报源。</summary>
+    public static string DescribeForeground()
+    {
+        try
+        {
+            var hwnd = GetForegroundWindow();
+            if (hwnd == IntPtr.Zero) return "fg=null";
+            var cls = new StringBuilder(64);
+            GetClassNameW(hwnd, cls, cls.Capacity);
+            var title = new StringBuilder(64);
+            GetWindowTextW(hwnd, title, title.Capacity);
+            GetWindowRect(hwnd, out var rect);
+            var placement = new WINDOWPLACEMENT { length = Marshal.SizeOf<WINDOWPLACEMENT>() };
+            GetWindowPlacement(hwnd, ref placement);
+            return $"fg=[{cls}] \"{title}\" rect={rect.Left},{rect.Top},{rect.Right},{rect.Bottom} showCmd={placement.showCmd}";
+        }
+        catch
+        {
+            return "fg=?";
+        }
     }
 
     /// <summary>原始 QUNS 状态值（诊断用）；出错返回 -1。</summary>
