@@ -24,9 +24,9 @@ public partial class WidgetWindow : Window
     private readonly DispatcherTimer _toastTimer = new();
     private readonly DispatcherTimer _typeTimer = new();
     private readonly DispatcherTimer _minuteTimer = new();
-    private readonly DispatcherTimer _fullscreenTimer = new();
+    private readonly DispatcherTimer _desktopTimer = new();
     private DispatcherTimer? _onboardingTimer;
-    private bool _hiddenByFullscreen;
+    private bool _hiddenByDesktopMode;
     private DateTime _dailyDate = DateTime.Now.Date;
     private int _lastReloadHour = -1;
     private string _typeTarget = "";
@@ -36,7 +36,6 @@ public partial class WidgetWindow : Window
     private bool _started;
     private bool _hovering;
     private bool _dragging;
-    private int _busyStreak;
     private bool _userForcedVisible;
     private Point _mouseDownPoint;
 
@@ -76,9 +75,9 @@ public partial class WidgetWindow : Window
 
         _typeTimer.Tick += TypeTick;
 
-        // 每 4 秒检测全屏应用/演示模式：是则自动隐藏，退出后自动恢复
-        _fullscreenTimer.Interval = TimeSpan.FromSeconds(4);
-        _fullscreenTimer.Tick += (_, _) => CheckFullscreen();
+        // "只在桌面显示"模式：每 1.2 秒检测前台是否为桌面（其它窗口占用时隐藏，回桌面自动恢复）
+        _desktopTimer.Interval = TimeSpan.FromMilliseconds(1200);
+        _desktopTimer.Tick += (_, _) => ApplyDisplayModeTick();
 
         // 每分钟心跳：处理勿扰时段边界、每日一句跨零点、定时词库跨时段换池
         _minuteTimer.Interval = TimeSpan.FromMinutes(1);
@@ -131,7 +130,7 @@ public partial class WidgetWindow : Window
             _lastReloadHour = DateTime.Now.Hour;
             UpdateAutoTimer();
             _minuteTimer.Start();
-            _fullscreenTimer.Start();
+            ApplyDisplayMode();
             _vm.RefreshHolidayBadge();
             if (AppServices.Settings.DailyMode)
                 ShowDaily();
@@ -152,7 +151,7 @@ public partial class WidgetWindow : Window
     {
         _autoTimer.Stop();
         _minuteTimer.Stop();
-        _fullscreenTimer.Stop();
+        _desktopTimer.Stop();
         _toastTimer.Stop();
         _typeTimer.Stop();
         _onboardingTimer?.Stop();
@@ -197,56 +196,65 @@ public partial class WidgetWindow : Window
 
     // ———————— 全屏自动隐藏 / 唤醒恢复 / 可见性 ————————
 
-    /// <summary>全屏应用/演示模式时自动隐藏，退出全屏后恢复（设置可关）。
-    /// 手动显示具有"否决权"：用户点过显示后，当前全屏会话内不再自动隐藏。</summary>
-    private void CheckFullscreen()
+    /// <summary>"只在桌面显示"模式：其它窗口在前台时自动隐藏，回到桌面自动恢复；
+    /// 关闭该模式时挂件始终显示在所有应用前面（默认）。</summary>
+    private void ApplyDisplayModeTick()
     {
         var s = AppServices.Settings;
-        if (!s.AutoHideFullscreen)
+        if (!s.DesktopOnlyWidget)
         {
-            _busyStreak = 0;
-            if (_hiddenByFullscreen)
+            if (_hiddenByDesktopMode)
             {
-                _hiddenByFullscreen = false;
+                _hiddenByDesktopMode = false;
                 Show();
             }
             return;
         }
 
-        bool busy = FullscreenWatcher.ShouldHideWidget();
-        if (!busy)
+        bool onDesktop = DesktopWatcher.IsDesktopForeground();
+        if (onDesktop) _userForcedVisible = false; // 回到桌面＝新一轮会话，恢复自动隐藏
+
+        if (onDesktop && _hiddenByDesktopMode)
         {
-            _busyStreak = 0;
-            _userForcedVisible = false; // 全屏会话结束，下次全屏恢复自动隐藏
-            if (_hiddenByFullscreen)
-            {
-                _hiddenByFullscreen = false;
-                Log.Info("fullscreen: 退出全屏，挂件恢复显示");
-                Show();
-            }
-            return;
+            _hiddenByDesktopMode = false;
+            Log.Info("desktop-mode: 回到桌面，挂件恢复显示");
+            Show();
         }
-
-        if (!IsVisible || _userForcedVisible) return;
-
-        // 连续两次（约 8 秒）确认全屏，避免瞬时误判导致闪烁
-        _busyStreak++;
-        if (_busyStreak < 2) return;
-        _busyStreak = 0;
-        _hiddenByFullscreen = true;
-        Log.Info($"fullscreen: 检测到全屏应用（state={FullscreenWatcher.QueryState()}，{FullscreenWatcher.DescribeForeground()}），挂件自动隐藏");
-        Hide();
+        else if (!onDesktop && IsVisible && !_userForcedVisible)
+        {
+            _hiddenByDesktopMode = true;
+            Log.Info($"desktop-mode: 其它窗口占用（{DesktopWatcher.DescribeForeground()}），挂件隐藏");
+            Hide();
+        }
     }
 
-    /// <summary>用户手动显示挂件：当前全屏会话内不再自动隐藏。</summary>
+    /// <summary>设置里切换显示模式后立即生效。</summary>
+    public void ApplyDisplayMode()
+    {
+        if (AppServices.Settings.DesktopOnlyWidget)
+        {
+            if (!_desktopTimer.IsEnabled) _desktopTimer.Start();
+            ApplyDisplayModeTick();
+        }
+        else
+        {
+            _desktopTimer.Stop();
+            if (_hiddenByDesktopMode)
+            {
+                _hiddenByDesktopMode = false;
+                Show();
+            }
+        }
+    }
+
+    /// <summary>用户手动显示挂件：直到下次回到桌面之前不再自动隐藏。</summary>
     public void NotifyUserShown()
     {
         _userForcedVisible = true;
-        _busyStreak = 0;
     }
 
-    /// <summary>当前是否因全屏检测而处于自动隐藏状态。</summary>
-    public bool IsAutoHidden => _hiddenByFullscreen;
+    /// <summary>当前是否因"只在桌面显示"模式而处于自动隐藏状态。</summary>
+    public bool IsAutoHidden => _hiddenByDesktopMode;
 
     /// <summary>睡眠唤醒 / 解锁后自愈：重采样壁纸、复位动画、恢复定时。</summary>
     private void OnWakeRecover()
@@ -266,7 +274,7 @@ public partial class WidgetWindow : Window
             _vm.SetPreviewText(_vm.CurrentQuote?.Text ?? _vm.Text);
             ApplySettings();
             UpdateAutoTimer();
-            CheckFullscreen();
+            ApplyDisplayModeTick();
         }
         catch { }
     }
@@ -278,7 +286,7 @@ public partial class WidgetWindow : Window
         if (active)
         {
             if (!_minuteTimer.IsEnabled) _minuteTimer.Start();
-            if (!_fullscreenTimer.IsEnabled) _fullscreenTimer.Start();
+            ApplyDisplayMode();
             UpdateAutoTimer();
         }
         else
@@ -287,7 +295,7 @@ public partial class WidgetWindow : Window
             _minuteTimer.Stop();
             _toastTimer.Stop();
             StopTypewriter();
-            // _fullscreenTimer 继续运行：它是自动隐藏后唯一能恢复显示的机制
+            // _desktopTimer 继续运行：它是自动隐藏后唯一能恢复显示的机制（勿停！）
         }
     }
 

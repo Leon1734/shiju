@@ -113,18 +113,49 @@ public partial class App : Application
         catch { }
     }
 
-    /// <summary>启动 15 秒后后台静默检查更新（配置了地址才生效）。</summary>
+    /// <summary>启动 15 秒后后台静默检查更新：GitHub Release > 自定义清单 > GitHub 新提交。</summary>
     private void ScheduleUpdateCheck()
     {
-        if (string.IsNullOrWhiteSpace(AppServices.Settings.UpdateUrl)) return;
+        var s = AppServices.Settings;
+        if (!s.GitHubUpdateCheck && string.IsNullOrWhiteSpace(s.UpdateUrl)) return;
         _ = Task.Run(async () =>
         {
             await Task.Delay(TimeSpan.FromSeconds(15));
-            var info = await UpdateChecker.CheckAsync(AppServices.Settings.UpdateUrl);
-            if (info == null) return;
-            Log.Info($"update: 发现新版本 {info.LatestVersion}");
-            Dispatcher.Invoke(() => ShowUpdateBalloon(info));
+
+            UpdateChecker.UpdateInfo? info = null;
+            if (s.GitHubUpdateCheck) info = await UpdateChecker.CheckGitHubReleaseAsync(s.GitHubRepo);
+            if (info == null && !string.IsNullOrWhiteSpace(s.UpdateUrl))
+                info = await UpdateChecker.CheckAsync(s.UpdateUrl);
+            if (info != null)
+            {
+                Dispatcher.Invoke(() => ShowUpdateBalloon(info));
+                return;
+            }
+
+            // 没有新版本时，看看仓库有没有新提交
+            if (!s.GitHubUpdateCheck) return;
+            var commit = await UpdateChecker.GetLatestCommitAsync(s.GitHubRepo);
+            if (commit == null || commit.Sha == s.LastSeenCommitSha) return;
+            bool firstBaseline = string.IsNullOrEmpty(s.LastSeenCommitSha);
+            s.LastSeenCommitSha = commit.Sha;
+            SettingsStore.Save(s);
+            if (firstBaseline) return; // 首次启用只记录基线，不打扰
+            Log.Info($"update: 仓库有新提交 {commit.ShortSha} {commit.Message}");
+            Dispatcher.Invoke(() => ShowCommitBalloon(commit));
         });
+    }
+
+    private UpdateChecker.CommitInfo? _pendingCommit;
+
+    /// <summary>托盘气泡提示仓库有新提交；点击打开提交页。</summary>
+    private void ShowCommitBalloon(UpdateChecker.CommitInfo commit)
+    {
+        if (_tray == null) return;
+        _pendingCommit = commit;
+        _pendingUpdate = null;
+        _tray.BalloonTipTitle = "拾句仓库有新提交";
+        _tray.BalloonTipText = $"{commit.ShortSha}：{commit.Message}（点击查看）";
+        _tray.ShowBalloonTip(10000);
     }
 
     private UpdateChecker.UpdateInfo? _pendingUpdate;
@@ -176,6 +207,12 @@ public partial class App : Application
 
     private void OnUpdateBalloonClick(object? sender, EventArgs e)
     {
+        if (_pendingCommit is { } commit)
+        {
+            _pendingCommit = null;
+            try { Process.Start(new ProcessStartInfo { FileName = commit.HtmlUrl, UseShellExecute = true }); } catch { }
+            return;
+        }
         var info = _pendingUpdate;
         if (info == null) return;
         var target = !string.IsNullOrWhiteSpace(info.DownloadUrl)
@@ -188,16 +225,39 @@ public partial class App : Application
         catch { }
     }
 
-    /// <summary>交互式检查更新（设置按钮 / 托盘菜单共用），返回结果文案。</summary>
+    /// <summary>交互式检查更新（设置按钮 / 托盘菜单共用）：GitHub Release 优先，其次自定义清单，最后提示新提交。</summary>
     public async Task<string> CheckUpdatesInteractiveAsync()
     {
-        if (string.IsNullOrWhiteSpace(AppServices.Settings.UpdateUrl))
-            return "未配置更新地址。把更新清单 JSON 的 URL 填到「更新检查地址」即可启用。";
+        var s = AppServices.Settings;
 
-        var info = await UpdateChecker.CheckAsync(AppServices.Settings.UpdateUrl);
-        if (info == null) return "已是最新版本，或更新地址暂不可访问。";
+        UpdateChecker.UpdateInfo? info = null;
+        if (s.GitHubUpdateCheck) info = await UpdateChecker.CheckGitHubReleaseAsync(s.GitHubRepo);
+        if (info == null && !string.IsNullOrWhiteSpace(s.UpdateUrl))
+            info = await UpdateChecker.CheckAsync(s.UpdateUrl);
+
+        if (info == null)
+        {
+            if (s.GitHubUpdateCheck)
+            {
+                var commit = await UpdateChecker.GetLatestCommitAsync(s.GitHubRepo);
+                if (commit != null && commit.Sha != s.LastSeenCommitSha)
+                {
+                    bool firstBaseline = string.IsNullOrEmpty(s.LastSeenCommitSha);
+                    s.LastSeenCommitSha = commit.Sha;
+                    SettingsStore.Save(s);
+                    if (firstBaseline)
+                        return $"已记录仓库基线（{commit.ShortSha}）。当前已是最新版本；以后有新提交或新 Release 会在这里提示。";
+                    Log.Info($"update: 仓库有新提交 {commit.ShortSha}");
+                    try { Process.Start(new ProcessStartInfo { FileName = commit.HtmlUrl, UseShellExecute = true }); } catch { }
+                    return $"仓库有新提交（{commit.ShortSha}：{commit.Message}），已打开提交页；正式版本发布后这里会提示升级。";
+                }
+            }
+            if (!s.GitHubUpdateCheck && string.IsNullOrWhiteSpace(s.UpdateUrl))
+                return "未配置更新来源。可在设置 → 通用 开启「从 GitHub 检查更新」。";
+            return "已是最新版本。";
+        }
+
         Log.Info($"update: 发现新版本 {info.LatestVersion}");
-
         if (!string.IsNullOrWhiteSpace(info.FileUrl))
         {
             var go = MessageBox.Show(
@@ -217,6 +277,8 @@ public partial class App : Application
         catch { }
         return $"发现新版本 v{info.LatestVersion}，已打开下载页。";
     }
+
+    
 
     protected override void OnExit(ExitEventArgs e)
     {
@@ -258,6 +320,9 @@ public partial class App : Application
                     break;
                 case nameof(AppSettings.ClickThrough):
                     _widget?.ApplyClickThrough();
+                    break;
+                case nameof(AppSettings.DesktopOnlyWidget):
+                    _widget?.ApplyDisplayMode();
                     break;
                 case nameof(AppSettings.CatMovie):
                 case nameof(AppSettings.CatGame):
@@ -354,13 +419,13 @@ public partial class App : Application
         hitokotoItem.Click += (_, _) => AppServices.Settings.UseHitokoto = hitokotoItem.Checked;
         menu.Items.Add(hitokotoItem);
 
-        var autoHideItem = new WinForms.ToolStripMenuItem("全屏应用时自动隐藏")
+        var desktopOnlyItem = new WinForms.ToolStripMenuItem("只在桌面显示（其它窗口在前台时隐藏）")
         {
             CheckOnClick = true,
-            Checked = AppServices.Settings.AutoHideFullscreen
+            Checked = AppServices.Settings.DesktopOnlyWidget
         };
-        autoHideItem.Click += (_, _) => AppServices.Settings.AutoHideFullscreen = autoHideItem.Checked;
-        menu.Items.Add(autoHideItem);
+        desktopOnlyItem.Click += (_, _) => AppServices.Settings.DesktopOnlyWidget = desktopOnlyItem.Checked;
+        menu.Items.Add(desktopOnlyItem);
 
         menu.Items.Add(new WinForms.ToolStripSeparator());
         menu.Items.Add("检查更新", null, (_, _) => _ = CheckUpdatesInteractiveAsync());
@@ -372,13 +437,13 @@ public partial class App : Application
             clickThroughItem.Checked = AppServices.Settings.ClickThrough;
             autoStartItem.Checked = AppServices.Settings.AutoStart;
             hitokotoItem.Checked = AppServices.Settings.UseHitokoto;
-            autoHideItem.Checked = AppServices.Settings.AutoHideFullscreen;
+            desktopOnlyItem.Checked = AppServices.Settings.DesktopOnlyWidget;
 
             showHideItem.Text = _widget switch
             {
                 null => "显示 / 隐藏挂件",
                 { IsVisible: true } => "隐藏挂件（当前：显示中）",
-                { IsAutoHidden: true } => "显示挂件（当前：被全屏自动隐藏）",
+                { IsAutoHidden: true } => "显示挂件（当前：因非桌面窗口已隐藏）",
                 _ => "显示挂件（当前：已隐藏）"
             };
         };

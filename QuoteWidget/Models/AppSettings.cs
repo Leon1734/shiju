@@ -84,8 +84,11 @@ public class AppSettings : INotifyPropertyChanged
     private bool _gradientText;
     private bool _rainbowText;
     private string _updateUrl = "";
+    private bool _gitHubUpdateCheck = true;
+    private string _gitHubRepo = "Leon1734/shiju";
+    private string _lastSeenCommitSha = "";
 
-    private bool _autoHideFullscreen;
+    private bool _desktopOnlyWidget;
     private bool _acrylicBackdrop;
     private bool _onboardingShown;
     private Dictionary<string, double[]> _windowPositions = new();
@@ -220,11 +223,20 @@ public class AppSettings : INotifyPropertyChanged
     /// <summary>更新检查地址（JSON：version/url/notes），空 = 停用。</summary>
     public string UpdateUrl { get => _updateUrl; set => Set(ref _updateUrl, value); }
 
-    /// <summary>全屏应用（游戏/视频/演示）运行时自动隐藏挂件，退出全屏自动恢复。</summary>
-    public bool AutoHideFullscreen { get => _autoHideFullscreen; set => Set(ref _autoHideFullscreen, value); }
+    /// <summary>只在桌面显示：任何其他窗口在前台时自动隐藏挂件，回到桌面自动出现（默认关闭＝始终显示在其他应用前面）。</summary>
+    public bool DesktopOnlyWidget { get => _desktopOnlyWidget; set => Set(ref _desktopOnlyWidget, value); }
 
     /// <summary>卡片模式使用亚克力模糊背景（Windows 11；切换后自动重建窗口）。</summary>
     public bool AcrylicBackdrop { get => _acrylicBackdrop; set => Set(ref _acrylicBackdrop, value); }
+
+    /// <summary>从 GitHub 仓库检查更新（新 Release 提示升级 / 新提交提示）。</summary>
+    public bool GitHubUpdateCheck { get => _gitHubUpdateCheck; set => Set(ref _gitHubUpdateCheck, value); }
+
+    /// <summary>用于检查更新的 GitHub 仓库（owner/name）。</summary>
+    public string GitHubRepo { get => _gitHubRepo; set => Set(ref _gitHubRepo, value); }
+
+    /// <summary>上次已知的最新提交 SHA（用于"新提交"提醒）。</summary>
+    public string LastSeenCommitSha { get => _lastSeenCommitSha; set => Set(ref _lastSeenCommitSha, value); }
 
     /// <summary>首启引导是否已展示过。</summary>
     public bool OnboardingShown { get => _onboardingShown; set => Set(ref _onboardingShown, value); }
@@ -283,7 +295,8 @@ public class AppSettings : INotifyPropertyChanged
         GradientText = false;
         RainbowText = false;
         UpdateUrl = "";
-        AutoHideFullscreen = false;
+        DesktopOnlyWidget = false;
+        GitHubUpdateCheck = true;
         AcrylicBackdrop = false;
     }
 }

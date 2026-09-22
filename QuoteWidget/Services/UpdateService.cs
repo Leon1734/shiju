@@ -23,8 +23,8 @@ public static class UpdateService
         var raw = Path.Combine(UpdateDir, "package.raw");
         var target = Path.Combine(UpdateDir, "QuoteWidget.new.exe");
 
-        using var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromMinutes(5) };
-        var bytes = await http.GetByteArrayAsync(info.FileUrl);
+        // 用带 DoH 直连能力的客户端：GitHub 域名被 hosts 拦截/直连抖动时仍可下载
+        var bytes = await GitHubHttp.Instance.GetByteArrayAsync(info.FileUrl);
         if (bytes.Length == 0) throw new InvalidOperationException("下载内容为空");
         await File.WriteAllBytesAsync(raw, bytes);
         ExtractExe(raw, target);

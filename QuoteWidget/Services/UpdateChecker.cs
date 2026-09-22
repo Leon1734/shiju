@@ -1,6 +1,7 @@
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
+using System.Text.Json;
 
 namespace QuoteWidget.Services;
 
@@ -19,7 +20,7 @@ public static class UpdateChecker
     {
         try
         {
-            using var doc = System.Text.Json.JsonDocument.Parse(json);
+            using var doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
             var version = root.TryGetProperty("version", out var v) ? v.GetString() : null;
             if (string.IsNullOrWhiteSpace(version)) return null;
@@ -82,5 +83,83 @@ public static class UpdateChecker
         while (nums.Count < 4) nums.Add(0);
         version = new Version(nums[0], nums[1], nums[2], nums[3]);
         return true;
+    }
+
+    // ———————— GitHub 源（无需自建清单服务器） ————————
+
+    public sealed record CommitInfo(string Sha, string ShortSha, string Message, string Date, string HtmlUrl);
+
+    /// <summary>检查 GitHub 最新 Release：有比当前更新的版本时返回更新信息（含 zip 附件直链）。</summary>
+    public static async Task<UpdateInfo?> CheckGitHubReleaseAsync(string repo)
+    {
+        if (string.IsNullOrWhiteSpace(repo)) return null;
+        try
+        {
+            var body = await GitHubHttp.Instance.GetStringAsync($"https://api.github.com/repos/{repo}/releases/latest");
+            using var doc = JsonDocument.Parse(body);
+            var root = doc.RootElement;
+
+            var tag = root.TryGetProperty("tag_name", out var t) ? t.GetString() ?? "" : "";
+            if (string.IsNullOrWhiteSpace(tag)) return null;
+            var version = tag.TrimStart('v', 'V');
+            if (!IsNewer(version, CurrentVersion())) return null;
+
+            var pageUrl = root.TryGetProperty("html_url", out var h) ? h.GetString() ?? "" : "";
+            var notesRaw = root.TryGetProperty("body", out var b) ? b.GetString() ?? "" : "";
+            var notes = notesRaw.Length > 400 ? notesRaw[..400] + "…" : notesRaw;
+
+            var fileUrl = "";
+            if (root.TryGetProperty("assets", out var assets))
+            {
+                foreach (var asset in assets.EnumerateArray())
+                {
+                    var name = asset.TryGetProperty("name", out var n) ? n.GetString() ?? "" : "";
+                    if (name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                    {
+                        fileUrl = asset.TryGetProperty("browser_download_url", out var u) ? u.GetString() ?? "" : "";
+                        if (fileUrl.Length > 0) break;
+                    }
+                }
+            }
+
+            var zipState = fileUrl.Length > 0 ? "有" : "无";
+            Log.Info($"update: GitHub Release v{version}（当前 v{CurrentVersion().ToString(3)}，zip={zipState}）");
+            return new UpdateInfo(version, pageUrl, notes, fileUrl);
+        }
+        catch (Exception ex)
+        {
+            Log.Warn("update: GitHub Release 检查失败 " + ex.Message);
+            return null;
+        }
+    }
+
+    /// <summary>获取分支最新提交（用于"有新提交"提醒）。</summary>
+    public static async Task<CommitInfo?> GetLatestCommitAsync(string repo, string branch = "main")
+    {
+        if (string.IsNullOrWhiteSpace(repo)) return null;
+        try
+        {
+            var body = await GitHubHttp.Instance.GetStringAsync($"https://api.github.com/repos/{repo}/commits/{branch}");
+            using var doc = JsonDocument.Parse(body);
+            var root = doc.RootElement;
+            var sha = root.TryGetProperty("sha", out var s) ? s.GetString() ?? "" : "";
+            if (sha.Length == 0) return null;
+            var html = root.TryGetProperty("html_url", out var h) ? h.GetString() ?? "" : "";
+            var message = "";
+            var date = "";
+            if (root.TryGetProperty("commit", out var commit))
+            {
+                if (commit.TryGetProperty("message", out var m) && m.GetString() is { } full)
+                    message = full.Split('\n')[0];
+                if (commit.TryGetProperty("author", out var author) && author.TryGetProperty("date", out var d))
+                    date = d.GetString() ?? "";
+            }
+            return new CommitInfo(sha, sha.Length >= 7 ? sha[..7] : sha, message, date, html);
+        }
+        catch (Exception ex)
+        {
+            Log.Warn("update: GitHub 提交检查失败 " + ex.Message);
+            return null;
+        }
     }
 }
