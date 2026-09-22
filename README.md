@@ -8,6 +8,8 @@
 
 ![拾句](docs/img/card-mode.png)
 
+**⬇️ [下载最新版（Releases）](../../releases/latest)** —— 免安装 zip，解压双击即用，词库与词典已内置。
+
 `WPF` `.NET 10` `零第三方依赖` `单文件 ~470KB` `离线可用`
 
 </div>
