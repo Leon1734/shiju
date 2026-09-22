@@ -570,11 +570,19 @@ public partial class WidgetWindow : Window
             SourceText.Foreground = MakeRainbowBrush();
             TranslationText.Foreground = MakeRainbowBrush();
         }
+        else if (s.GradientText)
+        {
+            QuoteText.Foreground = MakeTextGradient(textColor);
+            SourceText.ClearValue(TextBlock.ForegroundProperty);
+            TranslationText.ClearValue(TextBlock.ForegroundProperty);
+        }
         else
         {
-            QuoteText.Foreground = s.GradientText ? MakeTextGradient(textColor) : null;
-            SourceText.Foreground = null;
-            TranslationText.Foreground = null;
+            // 关键：必须 ClearValue 而不是赋值 null！
+            // Foreground = null 会显式设成"空画刷"导致文字不可见；ClearValue 才能恢复从 Root 继承颜色
+            QuoteText.ClearValue(TextBlock.ForegroundProperty);
+            SourceText.ClearValue(TextBlock.ForegroundProperty);
+            TranslationText.ClearValue(TextBlock.ForegroundProperty);
         }
         if (!_typeTimer.IsEnabled)
         {

@@ -462,6 +462,10 @@ public partial class App : Application
 
     public void ExitApp()
     {
+        var go = MessageBox.Show(
+            "确定要退出拾句吗？\n\n退出后挂件与托盘图标都会关闭；如需再次使用请重新运行程序。",
+            "拾句", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+        if (go != MessageBoxResult.OK) return;
         _settingsWindow?.Close();
         _favoritesWindow?.Close();
         Shutdown();

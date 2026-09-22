@@ -85,7 +85,7 @@ public class AppSettings : INotifyPropertyChanged
     private bool _rainbowText;
     private string _updateUrl = "";
 
-    private bool _autoHideFullscreen = true;
+    private bool _autoHideFullscreen;
     private bool _acrylicBackdrop;
     private bool _onboardingShown;
     private Dictionary<string, double[]> _windowPositions = new();
@@ -283,7 +283,7 @@ public class AppSettings : INotifyPropertyChanged
         GradientText = false;
         RainbowText = false;
         UpdateUrl = "";
-        AutoHideFullscreen = true;
+        AutoHideFullscreen = false;
         AcrylicBackdrop = false;
     }
 }
