@@ -30,6 +30,9 @@ public static class WallpaperService
         });
     }
 
+    /// <summary>重新采样壁纸亮度（换壁纸、系统唤醒、解锁后调用）。</summary>
+    public static void Resample() => Task.Run(Sample);
+
     private static void Sample()
     {
         try

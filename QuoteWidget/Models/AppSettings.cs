@@ -85,6 +85,11 @@ public class AppSettings : INotifyPropertyChanged
     private bool _rainbowText;
     private string _updateUrl = "";
 
+    private bool _autoHideFullscreen = true;
+    private bool _acrylicBackdrop;
+    private bool _onboardingShown;
+    private Dictionary<string, double[]> _windowPositions = new();
+
     private double? _windowLeft;
     private double? _windowTop;
     private string _lastQuoteText = "";
@@ -215,6 +220,18 @@ public class AppSettings : INotifyPropertyChanged
     /// <summary>更新检查地址（JSON：version/url/notes），空 = 停用。</summary>
     public string UpdateUrl { get => _updateUrl; set => Set(ref _updateUrl, value); }
 
+    /// <summary>全屏应用（游戏/视频/演示）运行时自动隐藏挂件，退出全屏自动恢复。</summary>
+    public bool AutoHideFullscreen { get => _autoHideFullscreen; set => Set(ref _autoHideFullscreen, value); }
+
+    /// <summary>卡片模式使用亚克力模糊背景（Windows 11；切换后自动重建窗口）。</summary>
+    public bool AcrylicBackdrop { get => _acrylicBackdrop; set => Set(ref _acrylicBackdrop, value); }
+
+    /// <summary>首启引导是否已展示过。</summary>
+    public bool OnboardingShown { get => _onboardingShown; set => Set(ref _onboardingShown, value); }
+
+    /// <summary>按显示器记忆的窗口位置（显示器设备名 -> [Left, Top]，DIP）。</summary>
+    public Dictionary<string, double[]> WindowPositions { get => _windowPositions; set => Set(ref _windowPositions, value); }
+
     /// <summary>恢复默认外观与行为，保留窗口位置。</summary>
     public void ResetToDefaults()
     {
@@ -266,5 +283,7 @@ public class AppSettings : INotifyPropertyChanged
         GradientText = false;
         RainbowText = false;
         UpdateUrl = "";
+        AutoHideFullscreen = true;
+        AcrylicBackdrop = false;
     }
 }

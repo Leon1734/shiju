@@ -488,6 +488,7 @@ public partial class SettingsWindow : Window
         BgColorRow.IsEnabled = enabled;
         BgOpacityRow.IsEnabled = enabled;
         CornerRadiusRow.IsEnabled = enabled;
+        AcrylicCheck.IsEnabled = enabled; // 亚克力只在卡片模式下有意义
         BgOpacityHintText.Text = enabled ? "" : "全透明模式没有背景，颜色 / 不透明度 / 圆角不生效；切到「半透明卡片」即可调整。";
     }
 
@@ -614,6 +615,79 @@ public partial class SettingsWindow : Window
         RebuildCustomBanks();
         AppServices.Quotes.Reload(_settings);
         RefreshPoolCount();
+    }
+
+    // ———————— 配置 / 词库包 导入导出 ————————
+
+    private void OnExportConfig(object sender, RoutedEventArgs e)
+    {
+        var dialog = new SaveFileDialog
+        {
+            FileName = $"拾句配置_{DateTime.Now:yyyyMMdd}.zip",
+            Filter = "拾句配置包|*.zip"
+        };
+        if (dialog.ShowDialog(this) != true) return;
+        try
+        {
+            ConfigPackService.ExportSettings(dialog.FileName);
+            Log.Info("config: 已导出配置包 " + dialog.FileName);
+            MessageBox.Show($"配置已导出（设置 + 收藏 + 词库 + 词典）：\n{dialog.FileName}\n\n在新电脑上用它「导入配置」即可完整迁移。",
+                "拾句", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            Log.Error("config: 导出失败", ex);
+            MessageBox.Show("导出失败：" + ex.Message, "拾句", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    private void OnImportConfig(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFileDialog
+        {
+            Title = "选择拾句配置包",
+            Filter = "拾句配置包|*.zip"
+        };
+        if (dialog.ShowDialog(this) != true) return;
+        var go = MessageBox.Show(
+            "导入将覆盖当前设置、收藏及同名词库文件，并自动重启程序。\n\n确定继续？",
+            "拾句 · 导入配置", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+        if (go != MessageBoxResult.OK) return;
+        try
+        {
+            var summary = ConfigPackService.ImportSettings(dialog.FileName);
+            Log.Info($"config: 导入完成 settings={summary.Settings} favorites={summary.Favorites} banks={summary.Banks} dict={summary.Dictionaries}");
+            MessageBox.Show(
+                $"导入完成：设置 {summary.Settings} 项、收藏 {summary.Favorites} 份、词库 {summary.Banks} 个、词典 {summary.Dictionaries} 个。\n\n程序即将重启生效。",
+                "拾句", MessageBoxButton.OK, MessageBoxImage.Information);
+            App.Current.RestartApp();
+        }
+        catch (Exception ex)
+        {
+            Log.Error("config: 导入失败", ex);
+            MessageBox.Show("导入失败：" + ex.Message, "拾句", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    private void OnExportBankPack(object sender, RoutedEventArgs e)
+    {
+        var dialog = new SaveFileDialog
+        {
+            FileName = $"拾句词库包_{DateTime.Now:yyyyMMdd}.zip",
+            Filter = "词库包|*.zip"
+        };
+        if (dialog.ShowDialog(this) != true) return;
+        try
+        {
+            int count = ConfigPackService.ExportBankPack(dialog.FileName);
+            MessageBox.Show($"已导出 {count} 个词库文件：\n{dialog.FileName}\n\n对方解压后放进程序目录的「词库」文件夹即可使用。",
+                "拾句", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            Log.Error("bank pack: 导出失败", ex);
+            MessageBox.Show("导出失败：" + ex.Message, "拾句", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
     }
 
     // ———————— 通用 ————————

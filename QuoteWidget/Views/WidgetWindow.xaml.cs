@@ -24,6 +24,9 @@ public partial class WidgetWindow : Window
     private readonly DispatcherTimer _toastTimer = new();
     private readonly DispatcherTimer _typeTimer = new();
     private readonly DispatcherTimer _minuteTimer = new();
+    private readonly DispatcherTimer _fullscreenTimer = new();
+    private DispatcherTimer? _onboardingTimer;
+    private bool _hiddenByFullscreen;
     private DateTime _dailyDate = DateTime.Now.Date;
     private int _lastReloadHour = -1;
     private string _typeTarget = "";
@@ -35,10 +38,30 @@ public partial class WidgetWindow : Window
     private bool _dragging;
     private Point _mouseDownPoint;
 
+    /// <summary>当前窗口是否运行在亚克力背景模式（由 App 在重建时决定）。</summary>
+    public bool IsAcrylicMode { get; }
+
+    private System.ComponentModel.PropertyChangedEventHandler? _settingsHandler;
+    private Action? _favoritesHandler;
+    private Action? _wallpaperHandler;
+    private Microsoft.Win32.PowerModeChangedEventHandler? _powerHandler;
+    private Microsoft.Win32.SessionSwitchEventHandler? _sessionHandler;
+
     public WidgetWindow()
     {
         InitializeComponent();
         DataContext = _vm;
+
+        // 亚克力背景需要非分层窗口（Windows 11 22621+），与全透明模式的 AllowsTransparency 互斥，
+        // 因此本模式在窗口创建时决定；切换该设置由 App 负责重建窗口。
+        IsAcrylicMode = AppServices.Settings.AcrylicBackdrop
+                        && AppServices.Settings.BgMode != BackgroundMode.Transparent
+                        && Environment.OSVersion.Version.Build >= 22621;
+        if (IsAcrylicMode)
+        {
+            AllowsTransparency = false;
+            Background = System.Windows.Media.Brushes.Transparent;
+        }
 
         _autoTimer.Tick += async (_, _) => await SwitchQuoteAsync(forceNew: false);
 
@@ -50,6 +73,10 @@ public partial class WidgetWindow : Window
         };
 
         _typeTimer.Tick += TypeTick;
+
+        // 每 4 秒检测全屏应用/演示模式：是则自动隐藏，退出后自动恢复
+        _fullscreenTimer.Interval = TimeSpan.FromSeconds(4);
+        _fullscreenTimer.Tick += (_, _) => CheckFullscreen();
 
         // 每分钟心跳：处理勿扰时段边界、每日一句跨零点、定时词库跨时段换池
         _minuteTimer.Interval = TimeSpan.FromMinutes(1);
@@ -70,9 +97,29 @@ public partial class WidgetWindow : Window
             }
         };
 
-        AppServices.Settings.PropertyChanged += (_, _) => ApplySettings();
-        AppServices.Favorites.Changed += () => Dispatcher.Invoke(_vm.RefreshFavorite);
-        WallpaperService.Changed += () => Dispatcher.Invoke(ApplySettings);
+        _settingsHandler = (_, _) => ApplySettings();
+        AppServices.Settings.PropertyChanged += _settingsHandler;
+        _favoritesHandler = () => Dispatcher.Invoke(_vm.RefreshFavorite);
+        AppServices.Favorites.Changed += _favoritesHandler;
+        _wallpaperHandler = () => Dispatcher.Invoke(ApplySettings);
+        WallpaperService.Changed += _wallpaperHandler;
+
+        // 隐藏时暂停一切定时与动画（省电）；唤醒/解锁后自愈恢复
+        IsVisibleChanged += (_, _) => SetActive(IsVisible);
+        try
+        {
+            _powerHandler = (_, args) =>
+            {
+                if (args.Mode == Microsoft.Win32.PowerModes.Resume) OnWakeRecover();
+            };
+            Microsoft.Win32.SystemEvents.PowerModeChanged += _powerHandler;
+            _sessionHandler = (_, args) =>
+            {
+                if (args.Reason == Microsoft.Win32.SessionSwitchReason.SessionUnlock) OnWakeRecover();
+            };
+            Microsoft.Win32.SystemEvents.SessionSwitch += _sessionHandler;
+        }
+        catch { }
 
         ApplySettings();
         ApplyStoredPosition();
@@ -82,14 +129,141 @@ public partial class WidgetWindow : Window
             _lastReloadHour = DateTime.Now.Hour;
             UpdateAutoTimer();
             _minuteTimer.Start();
+            _fullscreenTimer.Start();
             _vm.RefreshHolidayBadge();
             if (AppServices.Settings.DailyMode)
                 ShowDaily();
             else
                 _ = SwitchQuoteAsync(forceNew: true);
+            _ = MaybeShowOnboardingAsync();
         };
         ContentRendered += (_, _) => ClampIntoScreen();
-        SourceInitialized += (_, _) => ApplyClickThrough();
+        SourceInitialized += (_, _) =>
+        {
+            ApplyClickThrough();
+            ApplyAcrylicBackdrop();
+        };
+    }
+
+    /// <summary>窗口关闭（仅窗口重建/退出时）解除所有长时间订阅，避免悬挂回调。</summary>
+    protected override void OnClosed(EventArgs e)
+    {
+        _autoTimer.Stop();
+        _minuteTimer.Stop();
+        _fullscreenTimer.Stop();
+        _toastTimer.Stop();
+        _typeTimer.Stop();
+        _onboardingTimer?.Stop();
+        if (_settingsHandler != null) AppServices.Settings.PropertyChanged -= _settingsHandler;
+        if (_favoritesHandler != null) AppServices.Favorites.Changed -= _favoritesHandler;
+        if (_wallpaperHandler != null) WallpaperService.Changed -= _wallpaperHandler;
+        try
+        {
+            if (_powerHandler != null) Microsoft.Win32.SystemEvents.PowerModeChanged -= _powerHandler;
+            if (_sessionHandler != null) Microsoft.Win32.SystemEvents.SessionSwitch -= _sessionHandler;
+        }
+        catch { }
+        base.OnClosed(e);
+    }
+
+    // ———————— 亚克力背景（Windows 11） ————————
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
+
+    /// <summary>启用系统亚克力背景 + 系统圆角（仅 Windows 11 22H2+）。</summary>
+    private void ApplyAcrylicBackdrop()
+    {
+        if (!IsAcrylicMode) return;
+        var hwnd = new WindowInteropHelper(this).Handle;
+        if (hwnd == IntPtr.Zero) return;
+        try
+        {
+            const int DwmwaSystemBackdropType = 38;
+            const int DwmwaWindowCornerPreference = 33;
+            int acrylic = 3; // DWMSBT_TRANSIENTWINDOW
+            int round = 2;   // DWMWCP_ROUND
+            DwmSetWindowAttribute(hwnd, DwmwaSystemBackdropType, ref acrylic, sizeof(int));
+            DwmSetWindowAttribute(hwnd, DwmwaWindowCornerPreference, ref round, sizeof(int));
+            Log.Info("acrylic: 已启用亚克力背景");
+        }
+        catch (Exception ex)
+        {
+            Log.Warn("acrylic: 启用失败，回退普通背景 " + ex.Message);
+        }
+    }
+
+    // ———————— 全屏自动隐藏 / 唤醒恢复 / 可见性 ————————
+
+    /// <summary>全屏应用/演示模式时自动隐藏，退出全屏后恢复（设置可关）。</summary>
+    private void CheckFullscreen()
+    {
+        var s = AppServices.Settings;
+        if (!s.AutoHideFullscreen)
+        {
+            if (_hiddenByFullscreen)
+            {
+                _hiddenByFullscreen = false;
+                Show();
+            }
+            return;
+        }
+
+        bool busy = FullscreenWatcher.ShouldHideWidget();
+        if (busy && IsVisible)
+        {
+            _hiddenByFullscreen = true;
+            Log.Info("fullscreen: 检测到全屏应用，挂件自动隐藏");
+            Hide();
+        }
+        else if (!busy && _hiddenByFullscreen)
+        {
+            _hiddenByFullscreen = false;
+            Log.Info("fullscreen: 退出全屏，挂件恢复显示");
+            Show();
+        }
+    }
+
+    /// <summary>睡眠唤醒 / 解锁后自愈：重采样壁纸、复位动画、恢复定时。</summary>
+    private void OnWakeRecover()
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.BeginInvoke(OnWakeRecover);
+            return;
+        }
+        try
+        {
+            Log.Info("power: 唤醒/解锁，恢复运行状态");
+            WallpaperService.Resample();
+            StopTypewriter();
+            Root.BeginAnimation(OpacityProperty, null);
+            Root.Opacity = 1;
+            _vm.SetPreviewText(_vm.CurrentQuote?.Text ?? _vm.Text);
+            ApplySettings();
+            UpdateAutoTimer();
+            CheckFullscreen();
+        }
+        catch { }
+    }
+
+    /// <summary>可见性联动：隐藏时停掉定时器/动画，显示时恢复。</summary>
+    private void SetActive(bool active)
+    {
+        if (active)
+        {
+            if (!_minuteTimer.IsEnabled) _minuteTimer.Start();
+            if (!_fullscreenTimer.IsEnabled) _fullscreenTimer.Start();
+            UpdateAutoTimer();
+        }
+        else
+        {
+            _autoTimer.Stop();
+            _minuteTimer.Stop();
+            _fullscreenTimer.Stop();
+            _toastTimer.Stop();
+            StopTypewriter();
+        }
     }
 
     // ———————— 换句与动画 ————————
@@ -393,9 +567,20 @@ public partial class WidgetWindow : Window
             var alpha = (byte)Math.Clamp(
                 s.BgMode == BackgroundMode.Translucent ? s.BgOpacity * 255 * 0.45 : s.BgOpacity * 255,
                 8, 255);
-            Card.Background = MakeFlowGradient(baseColor, alpha);
-            Card.CornerRadius = new CornerRadius(s.CornerRadius);
-            Card.Effect = new DropShadowEffect { BlurRadius = 22, ShadowDepth = 4, Opacity = 0.35 };
+            if (IsAcrylicMode)
+            {
+                // 亚克力模式：系统圆角 + 更透的色调，让模糊背景透出来
+                Card.CornerRadius = new CornerRadius(0);
+                var soft = (byte)Math.Clamp(s.BgOpacity * 255 * 0.7, 24, 190);
+                Card.Background = new SolidColorBrush(Color.FromArgb(soft, baseColor.R, baseColor.G, baseColor.B));
+                Card.Effect = null;
+            }
+            else
+            {
+                Card.Background = MakeFlowGradient(baseColor, alpha);
+                Card.CornerRadius = new CornerRadius(s.CornerRadius);
+                Card.Effect = new DropShadowEffect { BlurRadius = 22, ShadowDepth = 4, Opacity = 0.35 };
+            }
         }
         else
         {
@@ -513,6 +698,23 @@ public partial class WidgetWindow : Window
     private void ApplyStoredPosition()
     {
         var s = AppServices.Settings;
+
+        // 优先：按当前显示器记住的位置（多屏场景各自记忆）
+        try
+        {
+            foreach (var device in MonitorHelper.AllDeviceNames())
+            {
+                if (s.WindowPositions.TryGetValue(device, out var pos) && pos is { Length: 2 })
+                {
+                    Left = pos[0];
+                    Top = pos[1];
+                    ClampIntoScreen();
+                    return;
+                }
+            }
+        }
+        catch { }
+
         if (s.WindowLeft is { } left && s.WindowTop is { } top)
         {
             Left = left;
@@ -545,6 +747,17 @@ public partial class WidgetWindow : Window
         var s = AppServices.Settings;
         s.WindowLeft = Left;
         s.WindowTop = Top;
+        try
+        {
+            // 记录到当前显示器名下（DIP -> 物理像素定位显示器）
+            var dpi = VisualTreeHelper.GetDpi(this);
+            var device = MonitorHelper.DeviceNameAt(
+                (int)((Left + Width / 2) * dpi.DpiScaleX),
+                (int)((Top + 10) * dpi.DpiScaleY));
+            if (!string.IsNullOrEmpty(device))
+                s.WindowPositions[device] = new[] { Left, Top };
+        }
+        catch { }
         SettingsStore.Save(s);
     }
 
@@ -552,6 +765,13 @@ public partial class WidgetWindow : Window
     {
         var hwnd = new WindowInteropHelper(this).Handle;
         if (hwnd == IntPtr.Zero) return;
+        if (IsAcrylicMode)
+        {
+            // 亚克力依赖非分层窗口，穿透所需的 LAYERED 会破坏模糊效果，此处仅保留 Alt+Tab 隐藏
+            int acrylicStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            SetWindowLong(hwnd, GWL_EXSTYLE, acrylicStyle | WS_EX_TOOLWINDOW);
+            return;
+        }
         int style = GetWindowLong(hwnd, GWL_EXSTYLE);
         style |= WS_EX_TOOLWINDOW; // 不出现在 Alt+Tab
         style = AppServices.Settings.ClickThrough
@@ -606,6 +826,20 @@ public partial class WidgetWindow : Window
 
     private void OnMouseDown(object sender, MouseButtonEventArgs e)
     {
+        if (OnboardingTip.Visibility == Visibility.Visible)
+        {
+            DismissOnboarding(); // 点任意处关闭引导
+            e.Handled = true;
+            return;
+        }
+        if (e.ChangedButton == MouseButton.Middle)
+        {
+            NextQuote(forceNew: true); // 中键随机换句
+            e.Handled = true;
+            return;
+        }
+        if (e.ChangedButton != MouseButton.Left) return;
+
         if (e.ClickCount == 2)
         {
             CopyCurrent();
@@ -614,6 +848,39 @@ public partial class WidgetWindow : Window
         }
         _mouseDownPoint = e.GetPosition(this);
         _dragging = false;
+    }
+
+    // ———————— 首启引导卡片 ————————
+
+    private async Task MaybeShowOnboardingAsync()
+    {
+        if (AppServices.Settings.OnboardingShown) return;
+        await Task.Delay(1400); // 等首句动画结束再弹
+        if (!IsVisible) return;
+        OnboardingTip.Visibility = Visibility.Visible;
+        OnboardingTip.BeginAnimation(OpacityProperty, new DoubleAnimation(1, TimeSpan.FromMilliseconds(350)));
+        _onboardingTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(12) };
+        _onboardingTimer.Tick += (_, _) => DismissOnboarding();
+        _onboardingTimer.Start();
+    }
+
+    private void DismissOnboarding()
+    {
+        if (OnboardingTip.Visibility != Visibility.Visible) return;
+        _onboardingTimer?.Stop();
+        _onboardingTimer = null;
+        OnboardingTip.BeginAnimation(OpacityProperty, new DoubleAnimation(0, TimeSpan.FromMilliseconds(400)));
+        OnboardingTip.IsHitTestVisible = false;
+        var collapse = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(460) };
+        collapse.Tick += (_, _) =>
+        {
+            collapse.Stop();
+            OnboardingTip.Visibility = Visibility.Collapsed;
+        };
+        collapse.Start();
+
+        AppServices.Settings.OnboardingShown = true;
+        SettingsStore.Save(AppServices.Settings);
     }
 
     /// <summary>悬停时滚轮换句：向上滚 = 上一句，向下滚 = 下一句。</summary>

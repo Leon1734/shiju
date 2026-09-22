@@ -157,6 +157,9 @@
                           Style="{StaticResource RowCheck}" IsChecked="{Binding GradientText}"/>
                 <CheckBox Grid.Row="11" Grid.Column="1" Content="七彩文字（彩虹渐变，优先于渐变色）"
                           Style="{StaticResource RowCheck}" IsChecked="{Binding RainbowText}"/>
+                <CheckBox Grid.Row="12" Grid.Column="1" x:Name="AcrylicCheck"
+                          Content="亚克力模糊背景（Windows 11，切换后自动重建窗口）"
+                          Style="{StaticResource RowCheck}" IsChecked="{Binding AcrylicBackdrop}"/>
                     </Grid>
                 </GroupBox>
 
@@ -192,6 +195,8 @@
                                   IsChecked="{Binding Typewriter}"/>
                         <CheckBox Content="多行句只显示第一行（悬停展开全文，如英中对照）"
                                   Style="{StaticResource RowCheck}" IsChecked="{Binding FoldMultiLine}"/>
+                        <CheckBox Content="全屏应用时自动隐藏挂件（退出全屏自动恢复）"
+                                  Style="{StaticResource RowCheck}" IsChecked="{Binding AutoHideFullscreen}"/>
                         <CheckBox Content="窗口置顶显示" Style="{StaticResource RowCheck}" IsChecked="{Binding Topmost}"/>
                     </StackPanel>
                 </GroupBox>
@@ -271,6 +276,7 @@
                                     Click="OnOpenBankFolder"/>
                             <Button Content="刷新词库" Style="{StaticResource DialogButton}" Click="OnRefreshBanks"/>
                             <Button Content="词库体检" Style="{StaticResource DialogButton}" Click="OnBankHealth"/>
+                            <Button Content="导出词库包（分享用）" Style="{StaticResource DialogButton}" Click="OnExportBankPack"/>
                         </StackPanel>
                     </StackPanel>
                 </GroupBox>
@@ -330,8 +336,14 @@
                         </StackPanel>
                         <TextBlock x:Name="UpdateStatusText" FontSize="11" Foreground="#8A8A93"
                                    TextWrapping="Wrap" Margin="0,0,0,4"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,4">
+                            <Button Content="导出配置（含词库）" Style="{StaticResource DialogButton}" Margin="0"
+                                    Click="OnExportConfig" Cursor="Hand"/>
+                            <Button Content="导入配置" Style="{StaticResource DialogButton}"
+                                    Click="OnImportConfig" Cursor="Hand"/>
+                        </StackPanel>
                         <Button Content="打开数据文件夹（设置 / 收藏 / 日志）" Style="{StaticResource DialogButton}"
-                                HorizontalAlignment="Left" Margin="0,8,0,4"
+                                HorizontalAlignment="Left" Margin="0,4,0,4"
                                 Click="OnOpenDataFolder"/>
                     </StackPanel>
                 </GroupBox>

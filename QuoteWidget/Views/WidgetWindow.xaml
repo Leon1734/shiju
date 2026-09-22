@@ -5,7 +5,7 @@
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False" ShowActivated="False" ResizeMode="NoResize"
         Focusable="False" WindowStartupLocation="Manual"
-        MouseLeftButtonDown="OnMouseDown" MouseMove="OnMouseMove"
+        MouseDown="OnMouseDown" MouseMove="OnMouseMove"
         MouseEnter="OnMouseEnter" MouseLeave="OnMouseLeave"
         MouseWheel="OnMouseWheel">
     <Window.Resources>
@@ -116,6 +116,25 @@
                 Opacity="0"
                 IsHitTestVisible="False">
             <TextBlock x:Name="ToastText" Foreground="White" FontSize="12"/>
+        </Border>
+
+        <!-- 首启引导卡片（点击即关闭，12 秒自动消失） -->
+        <Border x:Name="OnboardingTip"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Margin="12" Padding="18,14"
+                CornerRadius="12" Background="#F0222233"
+                BorderThickness="1" BorderBrush="#33FFFFFF"
+                Opacity="0" Visibility="Collapsed">
+            <StackPanel>
+                <TextBlock Text="👋 欢迎使用拾句" FontSize="14" Foreground="White" FontWeight="Bold"
+                           HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                <TextBlock Text="拖动 = 移动位置   ·   悬停 = 操作按钮" FontSize="12"
+                           Foreground="#E8E8F0" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                <TextBlock Text="滚轮 = 换句   ·   右键 = 功能菜单" FontSize="12"
+                           Foreground="#E8E8F0" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                <TextBlock Text="托盘图标可显示/隐藏 · 本提示点击即关" FontSize="11"
+                           Foreground="#9A9AA8" HorizontalAlignment="Center"/>
+            </StackPanel>
         </Border>
     </Grid>
 </Window>

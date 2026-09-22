@@ -139,6 +139,41 @@ public partial class App : Application
         _tray.ShowBalloonTip(10000);
     }
 
+    /// <summary>重启程序（导入配置后生效用）。</summary>
+    public void RestartApp()
+    {
+        try
+        {
+            if (Environment.ProcessPath is { } exe)
+                Process.Start(new ProcessStartInfo { FileName = exe, UseShellExecute = true });
+        }
+        catch { }
+        Shutdown();
+    }
+
+    /// <summary>按需重建挂件窗口（亚克力/背景模式切换会影响窗口分层，无法热切换）。</summary>
+    public void RecreateWidget()
+    {
+        try
+        {
+            var old = _widget;
+            var wasVisible = old?.IsVisible ?? true;
+            old?.SavePositionNow();
+            var fresh = new WidgetWindow();
+            _widget = fresh;
+            MainWindow = fresh;
+            old?.Close();
+            if (wasVisible) fresh.Show();
+            _hotkeys?.Attach(fresh);
+            _hotkeys?.Apply(AppServices.Settings);
+            Log.Info("widget: 已重建窗口（亚克力/背景模式切换）");
+        }
+        catch (Exception ex)
+        {
+            Log.Error("widget: 重建失败", ex);
+        }
+    }
+
     private void OnUpdateBalloonClick(object? sender, EventArgs e)
     {
         var info = _pendingUpdate;
@@ -231,9 +266,21 @@ public partial class App : Application
                 case nameof(AppSettings.RandomMode):
                     AppServices.Quotes.Reload(AppServices.Settings);
                     break;
+                case nameof(AppSettings.AcrylicBackdrop):
+                case nameof(AppSettings.BgMode):
+                    // 亚克力与否决定窗口分层模式，无法热切换 → 重建挂件窗口
+                    if (_widget != null && _widget.IsAcrylicMode != DesiredAcrylic(AppServices.Settings))
+                        RecreateWidget();
+                    break;
             }
         };
     }
+
+    /// <summary>当前设置下是否应使用亚克力背景（需 Win11 22H2+，且非全透明模式）。</summary>
+    public static bool DesiredAcrylic(AppSettings s) =>
+        s.AcrylicBackdrop
+        && s.BgMode != BackgroundMode.Transparent
+        && Environment.OSVersion.Version.Build >= 22621;
 
     /// <summary>全局快捷键：挂在挂件窗口的消息钩子上。</summary>
     private void InitHotkeys()
