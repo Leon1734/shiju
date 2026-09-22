@@ -321,7 +321,10 @@ public partial class App : Application
         menu.Items.Add("收藏当前句子", null, (_, _) => _widget?.FavoriteCurrent());
         menu.Items.Add(new WinForms.ToolStripSeparator());
 
-        menu.Items.Add("显示 / 隐藏挂件", null, (_, _) => ToggleWidget());
+        var showHideItem = new WinForms.ToolStripMenuItem("显示 / 隐藏挂件");
+        showHideItem.Click += (_, _) => ToggleWidget();
+        menu.Items.Add(showHideItem);
+
         menu.Items.Add("翻译小窗", null, (_, _) => ShowTranslate());
         menu.Items.Add("收藏夹", null, (_, _) => ShowFavorites());
         menu.Items.Add("设置", null, (_, _) => ShowSettings());
@@ -351,16 +354,33 @@ public partial class App : Application
         hitokotoItem.Click += (_, _) => AppServices.Settings.UseHitokoto = hitokotoItem.Checked;
         menu.Items.Add(hitokotoItem);
 
+        var autoHideItem = new WinForms.ToolStripMenuItem("全屏应用时自动隐藏")
+        {
+            CheckOnClick = true,
+            Checked = AppServices.Settings.AutoHideFullscreen
+        };
+        autoHideItem.Click += (_, _) => AppServices.Settings.AutoHideFullscreen = autoHideItem.Checked;
+        menu.Items.Add(autoHideItem);
+
         menu.Items.Add(new WinForms.ToolStripSeparator());
         menu.Items.Add("检查更新", null, (_, _) => _ = CheckUpdatesInteractiveAsync());
         menu.Items.Add("退出", null, (_, _) => ExitApp());
 
-        // 打开菜单前同步各勾选项的状态，避免设置窗口改动后托盘显示过期
+        // 打开菜单前同步勾选状态 + 刷新"显示/隐藏"的当前状态文案
         menu.Opening += (_, _) =>
         {
             clickThroughItem.Checked = AppServices.Settings.ClickThrough;
             autoStartItem.Checked = AppServices.Settings.AutoStart;
             hitokotoItem.Checked = AppServices.Settings.UseHitokoto;
+            autoHideItem.Checked = AppServices.Settings.AutoHideFullscreen;
+
+            showHideItem.Text = _widget switch
+            {
+                null => "显示 / 隐藏挂件",
+                { IsVisible: true } => "隐藏挂件（当前：显示中）",
+                { IsAutoHidden: true } => "显示挂件（当前：被全屏自动隐藏）",
+                _ => "显示挂件（当前：已隐藏）"
+            };
         };
 
         var iconStream = GetResourceStream(new Uri("pack://application:,,,/Assets/icon.ico"))!.Stream;
@@ -381,11 +401,22 @@ public partial class App : Application
     private void ToggleWidget()
     {
         if (_widget == null) return;
-        if (_widget.Visibility == Visibility.Visible) _widget.Hide();
-        else ShowWidget();
+        if (_widget.IsVisible)
+        {
+            _widget.Hide();
+        }
+        else
+        {
+            _widget.Show();
+            _widget.NotifyUserShown(); // 手动显示：当前全屏会话内不再被自动隐藏
+        }
     }
 
-    public void ShowWidget() => _widget?.Show();
+    public void ShowWidget()
+    {
+        _widget?.Show();
+        _widget?.NotifyUserShown();
+    }
 
     public void ShowQuote(Quote quote)
     {

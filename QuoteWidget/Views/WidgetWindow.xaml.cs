@@ -36,6 +36,8 @@ public partial class WidgetWindow : Window
     private bool _started;
     private bool _hovering;
     private bool _dragging;
+    private int _busyStreak;
+    private bool _userForcedVisible;
     private Point _mouseDownPoint;
 
     /// <summary>当前窗口是否运行在亚克力背景模式（由 App 在重建时决定）。</summary>
@@ -195,12 +197,14 @@ public partial class WidgetWindow : Window
 
     // ———————— 全屏自动隐藏 / 唤醒恢复 / 可见性 ————————
 
-    /// <summary>全屏应用/演示模式时自动隐藏，退出全屏后恢复（设置可关）。</summary>
+    /// <summary>全屏应用/演示模式时自动隐藏，退出全屏后恢复（设置可关）。
+    /// 手动显示具有"否决权"：用户点过显示后，当前全屏会话内不再自动隐藏。</summary>
     private void CheckFullscreen()
     {
         var s = AppServices.Settings;
         if (!s.AutoHideFullscreen)
         {
+            _busyStreak = 0;
             if (_hiddenByFullscreen)
             {
                 _hiddenByFullscreen = false;
@@ -210,19 +214,39 @@ public partial class WidgetWindow : Window
         }
 
         bool busy = FullscreenWatcher.ShouldHideWidget();
-        if (busy && IsVisible)
+        if (!busy)
         {
-            _hiddenByFullscreen = true;
-            Log.Info("fullscreen: 检测到全屏应用，挂件自动隐藏");
-            Hide();
+            _busyStreak = 0;
+            _userForcedVisible = false; // 全屏会话结束，下次全屏恢复自动隐藏
+            if (_hiddenByFullscreen)
+            {
+                _hiddenByFullscreen = false;
+                Log.Info("fullscreen: 退出全屏，挂件恢复显示");
+                Show();
+            }
+            return;
         }
-        else if (!busy && _hiddenByFullscreen)
-        {
-            _hiddenByFullscreen = false;
-            Log.Info("fullscreen: 退出全屏，挂件恢复显示");
-            Show();
-        }
+
+        if (!IsVisible || _userForcedVisible) return;
+
+        // 连续两次（约 8 秒）确认全屏，避免瞬时误判导致闪烁
+        _busyStreak++;
+        if (_busyStreak < 2) return;
+        _busyStreak = 0;
+        _hiddenByFullscreen = true;
+        Log.Info($"fullscreen: 检测到全屏应用（state={FullscreenWatcher.QueryState()}），挂件自动隐藏");
+        Hide();
     }
+
+    /// <summary>用户手动显示挂件：当前全屏会话内不再自动隐藏。</summary>
+    public void NotifyUserShown()
+    {
+        _userForcedVisible = true;
+        _busyStreak = 0;
+    }
+
+    /// <summary>当前是否因全屏检测而处于自动隐藏状态。</summary>
+    public bool IsAutoHidden => _hiddenByFullscreen;
 
     /// <summary>睡眠唤醒 / 解锁后自愈：重采样壁纸、复位动画、恢复定时。</summary>
     private void OnWakeRecover()
