@@ -83,6 +83,7 @@ public partial class SettingsWindow : Window
         InitHotkeyBoxes();
         ApplyEngineRows();
 
+        VersionText.Text = $"当前版本 v{UpdateChecker.CurrentVersion().ToString(3)}";
         RebuildCustomBanks();
         ApplyBgControlsEnabled();
         ApplyDailyModeEnabled();
@@ -364,45 +365,15 @@ public partial class SettingsWindow : Window
 
     private async void OnCheckUpdate(object sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(_settings.UpdateUrl))
-        {
-            UpdateStatusText.Text = "未配置更新地址。把更新清单 JSON 的 URL 填到上方「更新检查地址」即可启用。";
-            return;
-        }
         UpdateStatusText.Text = "正在检查更新…";
-        var info = await UpdateChecker.CheckAsync(_settings.UpdateUrl);
-        if (info == null)
+        try
         {
-            UpdateStatusText.Text = "已是最新版本，或更新地址暂不可访问。";
-            return;
+            UpdateStatusText.Text = await App.Current.CheckUpdatesInteractiveAsync();
         }
-        Log.Info($"update: 发现新版本 {info.LatestVersion}");
-        if (!string.IsNullOrWhiteSpace(info.FileUrl))
+        catch (Exception ex)
         {
-            var go = MessageBox.Show(
-                $"发现新版本 v{info.LatestVersion}\n\n{info.Notes}\n\n立即下载并升级？升级会自动重启程序。",
-                "拾句 · 软件升级", MessageBoxButton.YesNo, MessageBoxImage.Information);
-            if (go != MessageBoxResult.Yes) return;
-            UpdateStatusText.Text = "正在下载升级包…";
-            try
-            {
-                var path = await UpdateService.DownloadAsync(info);
-                UpdateService.ApplyAndRestart(path);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("update: 升级失败", ex);
-                UpdateStatusText.Text = "升级失败：" + ex.Message;
-            }
-        }
-        else
-        {
-            UpdateStatusText.Text = $"发现新版本 v{info.LatestVersion}（清单未提供直链，打开下载页手动获取）。";
-            try
-            {
-                Process.Start(new ProcessStartInfo { FileName = info.DownloadUrl, UseShellExecute = true });
-            }
-            catch { }
+            Log.Error("update: 检查/升级失败", ex);
+            UpdateStatusText.Text = "升级失败：" + ex.Message;
         }
     }
 

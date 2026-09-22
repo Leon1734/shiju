@@ -316,6 +316,8 @@
                         </DockPanel>
                         <CheckBox Content="鼠标穿透（开启后挂件不响应鼠标，可从托盘菜单关闭）"
                                   Style="{StaticResource RowCheck}" IsChecked="{Binding ClickThrough}"/>
+                        <TextBlock x:Name="VersionText" FontSize="12" Foreground="#5B7DB1" Margin="0,4,0,2"
+                                   Text="当前版本"/>
                         <TextBlock Text="更新检查地址（留空停用；指向 JSON 清单：{&quot;version&quot;:&quot;2.3.0&quot;,&quot;url&quot;:&quot;下载页&quot;,&quot;file&quot;:&quot;安装包直链&quot;,&quot;notes&quot;:&quot;说明&quot;}）"
                                    FontSize="12" Foreground="#44444E" Margin="0,6,0,2"/>
                         <TextBox Text="{Binding UpdateUrl, UpdateSourceTrigger=PropertyChanged}" FontSize="12"

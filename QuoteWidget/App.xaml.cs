@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using QuoteWidget.Models;
@@ -55,6 +56,7 @@ public partial class App : Application
             Thread.Sleep(delaySeconds * 1000);
         }
 
+        CleanUpdateCache();
         AppServices.Initialize();
         Log.Cleanup();
         Log.Info("拾句启动" + (delaySeconds > 0 ? $"（延迟 {delaySeconds}s）" : ""));
@@ -97,39 +99,88 @@ public partial class App : Application
         if (e.Args.Contains("--open-favorites")) ShowFavorites();
     }
 
-    /// <summary>启动 15 秒后后台检查更新（配置了地址才生效），有新版托盘气泡提示。</summary>
+    /// <summary>清理上次升级留下的缓存文件（下载包/替换脚本）。</summary>
+    private static void CleanUpdateCache()
+    {
+        try
+        {
+            if (!Directory.Exists(UpdateService.UpdateDir)) return;
+            foreach (var file in Directory.GetFiles(UpdateService.UpdateDir))
+            {
+                try { File.Delete(file); } catch { }
+            }
+        }
+        catch { }
+    }
+
+    /// <summary>启动 15 秒后后台静默检查更新（配置了地址才生效）。</summary>
     private void ScheduleUpdateCheck()
     {
         if (string.IsNullOrWhiteSpace(AppServices.Settings.UpdateUrl)) return;
-        var _ = Task.Run(async () =>
+        _ = Task.Run(async () =>
         {
             await Task.Delay(TimeSpan.FromSeconds(15));
             var info = await UpdateChecker.CheckAsync(AppServices.Settings.UpdateUrl);
             if (info == null) return;
             Log.Info($"update: 发现新版本 {info.LatestVersion}");
-            Dispatcher.Invoke(() =>
-            {
-                if (_tray == null) return;
-                _tray.BalloonTipTitle = $"拾句有新版本 v{info.LatestVersion}";
-                _tray.BalloonTipText = string.IsNullOrWhiteSpace(info.Notes) ? "点击查看下载地址" : info.Notes;
-                _tray.BalloonTipClicked += OnUpdateBalloonClick;
-                _tray.ShowBalloonTip(8000);
-            });
+            Dispatcher.Invoke(() => ShowUpdateBalloon(info));
         });
+    }
+
+    private UpdateChecker.UpdateInfo? _pendingUpdate;
+
+    /// <summary>托盘气泡提示有新版；点击后打开下载页（修复：以前误开清单地址）。</summary>
+    private void ShowUpdateBalloon(UpdateChecker.UpdateInfo info)
+    {
+        if (_tray == null) return;
+        _pendingUpdate = info;
+        _tray.BalloonTipTitle = $"拾句有新版本 v{info.LatestVersion}（当前 v{UpdateChecker.CurrentVersion().ToString(3)}）";
+        _tray.BalloonTipText = string.IsNullOrWhiteSpace(info.Notes) ? "点击打开下载页" : info.Notes;
+        _tray.ShowBalloonTip(10000);
     }
 
     private void OnUpdateBalloonClick(object? sender, EventArgs e)
     {
+        var info = _pendingUpdate;
+        if (info == null) return;
+        var target = !string.IsNullOrWhiteSpace(info.DownloadUrl)
+            ? info.DownloadUrl
+            : AppServices.Settings.UpdateUrl;
         try
         {
-            if (!string.IsNullOrWhiteSpace(AppServices.Settings.UpdateUrl))
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = AppServices.Settings.UpdateUrl,
-                    UseShellExecute = true
-                });
+            Process.Start(new ProcessStartInfo { FileName = target, UseShellExecute = true });
         }
         catch { }
+    }
+
+    /// <summary>交互式检查更新（设置按钮 / 托盘菜单共用），返回结果文案。</summary>
+    public async Task<string> CheckUpdatesInteractiveAsync()
+    {
+        if (string.IsNullOrWhiteSpace(AppServices.Settings.UpdateUrl))
+            return "未配置更新地址。把更新清单 JSON 的 URL 填到「更新检查地址」即可启用。";
+
+        var info = await UpdateChecker.CheckAsync(AppServices.Settings.UpdateUrl);
+        if (info == null) return "已是最新版本，或更新地址暂不可访问。";
+        Log.Info($"update: 发现新版本 {info.LatestVersion}");
+
+        if (!string.IsNullOrWhiteSpace(info.FileUrl))
+        {
+            var go = MessageBox.Show(
+                $"发现新版本 v{info.LatestVersion}（当前 v{UpdateChecker.CurrentVersion().ToString(3)}）\n\n{info.Notes}\n\n立即下载并升级？升级会自动重启程序，词库与设置不受影响。",
+                "拾句 · 软件升级", MessageBoxButton.YesNo, MessageBoxImage.Information);
+            if (go != MessageBoxResult.Yes) return "已取消升级。";
+            var path = await UpdateService.DownloadAsync(info);
+            UpdateService.ApplyAndRestart(path);
+            return "正在升级并重启…";
+        }
+
+        ShowUpdateBalloon(info);
+        try
+        {
+            Process.Start(new ProcessStartInfo { FileName = info.DownloadUrl, UseShellExecute = true });
+        }
+        catch { }
+        return $"发现新版本 v{info.LatestVersion}，已打开下载页。";
     }
 
     protected override void OnExit(ExitEventArgs e)
@@ -254,6 +305,7 @@ public partial class App : Application
         menu.Items.Add(hitokotoItem);
 
         menu.Items.Add(new WinForms.ToolStripSeparator());
+        menu.Items.Add("检查更新", null, (_, _) => _ = CheckUpdatesInteractiveAsync());
         menu.Items.Add("退出", null, (_, _) => ExitApp());
 
         // 打开菜单前同步各勾选项的状态，避免设置窗口改动后托盘显示过期
@@ -276,6 +328,7 @@ public partial class App : Application
         {
             if (args.Button == WinForms.MouseButtons.Left) ToggleWidget();
         };
+        _tray.BalloonTipClicked += OnUpdateBalloonClick;
     }
 
     private void ToggleWidget()

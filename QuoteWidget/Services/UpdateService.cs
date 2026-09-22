@@ -47,10 +47,16 @@ public static class UpdateService
         if (string.IsNullOrEmpty(current)) throw new InvalidOperationException("无法确定当前程序路径");
 
         var bat = Path.Combine(UpdateDir, "update.bat");
+        // 等待旧进程完全退出后替换。注意：隐藏控制台下 timeout 会立即失败，
+        // 改用 ping 做延时，并用重试循环应对文件锁尚未释放的情况。
         var script = $"""
             @echo off
-            timeout /t 2 /nobreak >nul
-            copy /y "{newExePath}" "{current}"
+            ping -n 3 127.0.0.1 >nul
+            for /l %%i in (1,1,30) do (
+              copy /y "{newExePath}" "{current}" >nul 2>&1 && goto run
+              ping -n 2 127.0.0.1 >nul
+            )
+            :run
             start "" "{current}"
             del "%~f0"
             """;
@@ -60,18 +66,29 @@ public static class UpdateService
         Application.Current.Shutdown();
     }
 
+    /// <summary>按文件内容（PK/MZ 魔数）判断是 zip 还是 exe，不依赖扩展名。</summary>
     private static void ExtractExe(string packagePath, string targetExe)
     {
-        if (packagePath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+        var head = new byte[4];
+        using (var fs = File.OpenRead(packagePath)) fs.ReadExactly(head, 0, 4);
+
+        bool isZip = head[0] == 0x50 && head[1] == 0x4B;      // 'PK' → zip
+        bool isExe = head[0] == 0x4D && head[1] == 0x5A;      // 'MZ' → Windows 程序
+
+        if (isZip)
         {
             using var zip = ZipFile.OpenRead(packagePath);
             var entry = zip.Entries.FirstOrDefault(e => e.Name.Equals("QuoteWidget.exe", StringComparison.OrdinalIgnoreCase))
                 ?? throw new InvalidOperationException("压缩包里没有找到 QuoteWidget.exe");
             entry.ExtractToFile(targetExe, true);
         }
-        else
+        else if (isExe)
         {
             File.Copy(packagePath, targetExe, true);
+        }
+        else
+        {
+            throw new InvalidOperationException("升级包不是有效的 Windows 程序或压缩包（可能下载到了错误内容）");
         }
     }
 }
