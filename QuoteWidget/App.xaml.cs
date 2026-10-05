@@ -92,6 +92,8 @@ public partial class App : Application
         InitTray();
         InitHotkeys();
         ScheduleUpdateCheck();
+        ShutdownService.Initialize();
+        ShutdownService.Warning += OnShutdownWarning;
 
         // 文档/调试用：启动时直接打开指定窗口
         if (e.Args.Contains("--open-settings")) ShowSettings();
@@ -205,8 +207,55 @@ public partial class App : Application
         }
     }
 
+    /// <summary>快捷设置定时关机/重启。</summary>
+    private void ScheduleShutdown(int minutes, ShutdownAction action)
+    {
+        ShutdownService.Schedule(DateTime.Now.AddMinutes(minutes), action);
+    }
+
+    /// <summary>打开定时关机设置窗口。</summary>
+    public void ShowShutdownDialog()
+    {
+        try
+        {
+            var dialog = new ShutdownDialog
+            {
+                Owner = _settingsWindow is { IsVisible: true } ? _settingsWindow : null
+            };
+            dialog.ShowDialog();
+        }
+        catch (Exception ex)
+        {
+            Log.Error("shutdown: 打开设置窗口失败", ex);
+        }
+    }
+
+    /// <summary>定时关机的提醒（5 分钟 / 60 秒）：托盘气泡 + 挂件气泡，点击可取消。</summary>
+    private void OnShutdownWarning(string message, bool cancellable)
+    {
+        Dispatcher.Invoke(() =>
+        {
+            _pendingShutdownWarning = cancellable;
+            if (_tray != null)
+            {
+                _tray.BalloonTipTitle = "拾句 · 定时关机提醒";
+                _tray.BalloonTipText = message;
+                _tray.ShowBalloonTip(10000);
+            }
+            _widget?.ShowNotice(message);
+        });
+    }
+
+    private bool _pendingShutdownWarning;
+
     private void OnUpdateBalloonClick(object? sender, EventArgs e)
     {
+        if (_pendingShutdownWarning)
+        {
+            _pendingShutdownWarning = false;
+            ShutdownService.Cancel();
+            return;
+        }
         if (_pendingCommit is { } commit)
         {
             _pendingCommit = null;
@@ -427,6 +476,19 @@ public partial class App : Application
         desktopOnlyItem.Click += (_, _) => AppServices.Settings.DesktopOnlyWidget = desktopOnlyItem.Checked;
         menu.Items.Add(desktopOnlyItem);
 
+        // —— 定时关机 ——
+        menu.Items.Add(new WinForms.ToolStripSeparator());
+        var shutdownMenu = new WinForms.ToolStripMenuItem("定时关机");
+        shutdownMenu.DropDownItems.Add("30 分钟后", null, (_, _) => ScheduleShutdown(30, ShutdownAction.Shutdown));
+        shutdownMenu.DropDownItems.Add("60 分钟后", null, (_, _) => ScheduleShutdown(60, ShutdownAction.Shutdown));
+        shutdownMenu.DropDownItems.Add("120 分钟后", null, (_, _) => ScheduleShutdown(120, ShutdownAction.Shutdown));
+        shutdownMenu.DropDownItems.Add(new WinForms.ToolStripSeparator());
+        shutdownMenu.DropDownItems.Add("自定义时间…", null, (_, _) => ShowShutdownDialog());
+        var shutdownCancelItem = new WinForms.ToolStripMenuItem("取消定时");
+        shutdownCancelItem.Click += (_, _) => ShutdownService.Cancel();
+        shutdownMenu.DropDownItems.Add(shutdownCancelItem);
+        menu.Items.Add(shutdownMenu);
+
         menu.Items.Add(new WinForms.ToolStripSeparator());
         menu.Items.Add("检查更新", null, (_, _) => _ = CheckUpdatesInteractiveAsync());
         menu.Items.Add("退出", null, (_, _) => ExitApp());
@@ -438,6 +500,11 @@ public partial class App : Application
             autoStartItem.Checked = AppServices.Settings.AutoStart;
             hitokotoItem.Checked = AppServices.Settings.UseHitokoto;
             desktopOnlyItem.Checked = AppServices.Settings.DesktopOnlyWidget;
+
+            shutdownCancelItem.Text = ShutdownService.IsScheduled
+                ? $"取消定时（{ShutdownService.ActionName(ShutdownService.Action)} · 剩余 {ShutdownService.RemainingText}）"
+                : "取消定时（未设置）";
+            shutdownCancelItem.Enabled = ShutdownService.IsScheduled;
 
             showHideItem.Text = _widget switch
             {

@@ -1007,6 +1007,9 @@ public partial class WidgetWindow : Window
         }
     }
 
+    /// <summary>外部通知（如定时关机提醒）在挂件上弹一条气泡。</summary>
+    public void ShowNotice(string message) => ShowToast(message);
+
     private void ShowToast(string message)
     {
         ToastText.Text = message;

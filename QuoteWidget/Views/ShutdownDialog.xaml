@@ -1,0 +1,36 @@
+<Window x:Class="QuoteWidget.Views.ShutdownDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="定时关机 - 拾句" Width="380" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="#FAFAFC">
+    <StackPanel Margin="18">
+        <TextBlock Text="到时间后执行" FontSize="13" Foreground="#44444E" Margin="0,0,0,6"/>
+        <ComboBox x:Name="ActionCombo" Width="200" HorizontalAlignment="Left" Margin="0,0,0,14" FontSize="13"/>
+
+        <TextBlock Text="定时方式" FontSize="13" Foreground="#44444E" Margin="0,0,0,6"/>
+        <RadioButton x:Name="CountdownRadio" Content="倒计时" GroupName="mode" IsChecked="True"
+                     FontSize="13" Foreground="#44444E" Margin="0,0,0,6" Cursor="Hand"/>
+        <DockPanel Margin="22,0,0,10">
+            <TextBox x:Name="MinutesBox" Text="60" Width="70" FontSize="13"/>
+            <TextBlock Text=" 分钟后执行" FontSize="13" Foreground="#44444E" VerticalAlignment="Center"/>
+        </DockPanel>
+
+        <RadioButton x:Name="ClockRadio" Content="指定时刻（HH:mm，已过则顺延到明天）" GroupName="mode"
+                     FontSize="13" Foreground="#44444E" Margin="0,0,0,6" Cursor="Hand"/>
+        <DockPanel Margin="22,0,0,4">
+            <TextBox x:Name="ClockBox" Text="23:00" Width="70" FontSize="13"/>
+        </DockPanel>
+
+        <TextBlock x:Name="HintText" FontSize="11" Foreground="#8A8A93" TextWrapping="Wrap" Margin="0,8,0,0"/>
+        <TextBlock x:Name="StatusText" FontSize="12" Foreground="#5B7DB1" TextWrapping="Wrap" Margin="0,4,0,0"/>
+
+        <DockPanel Margin="0,14,0,0">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Content="取消定时" Style="{StaticResource DialogButton}" Click="OnCancelPlan" Cursor="Hand"/>
+                <Button Content="确定" Style="{StaticResource DialogButton}" Click="OnOk" Cursor="Hand"/>
+                <Button Content="关闭" Style="{StaticResource DialogButton}" Click="OnCloseClick" Cursor="Hand"/>
+            </StackPanel>
+        </DockPanel>
+    </StackPanel>
+</Window>

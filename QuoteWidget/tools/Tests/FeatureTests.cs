@@ -90,6 +90,42 @@ public class FeatureTests : IDisposable
         Assert.True(QuoteRepository.IsScheduleActive(2, 0));
     }
 
+    // ———————— 定时关机 ————————
+
+    [Theory]
+    [InlineData(2, 5, 0, "2 小时 5 分钟")]
+    [InlineData(0, 30, 0, "30 分钟")]
+    [InlineData(0, 1, 30, "1 分钟")]
+    [InlineData(0, 0, 45, "45 秒")]
+    public void 剩余时间文案(int hours, int minutes, int seconds, string expected)
+    {
+        Assert.Equal(expected, ShutdownService.FormatRemaining(new TimeSpan(hours, minutes, seconds)));
+    }
+
+    [Fact]
+    public void 剩余时间为负显示即将()
+    {
+        Assert.Equal("即将", ShutdownService.FormatRemaining(TimeSpan.FromSeconds(-5)));
+    }
+
+    [Fact]
+    public void 时刻解析_支持中文冒号与顺延()
+    {
+        Assert.True(ShutdownService.TryParseClock("23:30", out var at1));
+        Assert.Equal(23, at1.Hour);
+        Assert.Equal(30, at1.Minute);
+        Assert.True(at1 > DateTime.Now);
+
+        Assert.True(ShutdownService.TryParseClock("00：05", out var at2)); // 中文冒号
+        Assert.Equal(5, at2.Minute);
+
+        Assert.True(ShutdownService.TryParseClock("00:01", out var at3));  // 今天已过 → 明天
+        Assert.Equal(DateTime.Now.Date.AddDays(1).AddMinutes(1), at3);
+
+        Assert.False(ShutdownService.TryParseClock("25:00", out _));
+        Assert.False(ShutdownService.TryParseClock("abc", out _));
+    }
+
     // ———————— 节日识别 ————————
 
     [Fact]

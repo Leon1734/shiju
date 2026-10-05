@@ -339,6 +339,14 @@
                         </StackPanel>
                         <TextBlock x:Name="UpdateStatusText" FontSize="11" Foreground="#8A8A93"
                                    TextWrapping="Wrap" Margin="0,0,0,4"/>
+                        <TextBlock x:Name="ShutdownStatusText" FontSize="12" Foreground="#5B7DB1"
+                                   Margin="0,6,0,2" Text="定时关机：未设置"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,4">
+                            <Button Content="定时关机设置…" Style="{StaticResource DialogButton}" Margin="0"
+                                    Click="OnOpenShutdownDialog" Cursor="Hand"/>
+                            <Button Content="取消定时" Style="{StaticResource DialogButton}"
+                                    Click="OnCancelShutdown" Cursor="Hand"/>
+                        </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,8,0,4">
                             <Button Content="导出配置（含词库）" Style="{StaticResource DialogButton}" Margin="0"
                                     Click="OnExportConfig" Cursor="Hand"/>

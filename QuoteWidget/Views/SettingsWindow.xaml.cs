@@ -84,6 +84,8 @@ public partial class SettingsWindow : Window
         ApplyEngineRows();
 
         VersionText.Text = $"当前版本 v{UpdateChecker.CurrentVersion().ToString(3)}";
+        RefreshShutdownStatus();
+        ShutdownService.StateChanged += RefreshShutdownStatus;
         RebuildCustomBanks();
         ApplyBgControlsEnabled();
         ApplyDailyModeEnabled();
@@ -690,6 +692,27 @@ public partial class SettingsWindow : Window
         }
     }
 
+    // ———————— 定时关机 ————————
+
+    private void RefreshShutdownStatus()
+    {
+        ShutdownStatusText.Text = ShutdownService.IsScheduled
+            ? $"定时关机：{ShutdownService.RemainingText}后{ShutdownService.ActionName(ShutdownService.Action)}"
+            : "定时关机：未设置";
+    }
+
+    private void OnOpenShutdownDialog(object sender, RoutedEventArgs e)
+    {
+        App.Current.ShowShutdownDialog();
+        RefreshShutdownStatus();
+    }
+
+    private void OnCancelShutdown(object sender, RoutedEventArgs e)
+    {
+        ShutdownService.Cancel();
+        RefreshShutdownStatus();
+    }
+
     // ———————— 通用 ————————
 
     private void OnOpenDataFolder(object sender, RoutedEventArgs e)
@@ -713,6 +736,7 @@ public partial class SettingsWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         SettingsStore.Save(_settings);
+        ShutdownService.StateChanged -= RefreshShutdownStatus;
         base.OnClosed(e);
     }
 }

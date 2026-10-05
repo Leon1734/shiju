@@ -89,6 +89,8 @@ public class AppSettings : INotifyPropertyChanged
     private string _lastSeenCommitSha = "";
 
     private bool _desktopOnlyWidget;
+    private DateTime? _shutdownAt;
+    private string _shutdownAction = "";
     private bool _acrylicBackdrop;
     private bool _onboardingShown;
     private Dictionary<string, double[]> _windowPositions = new();
@@ -237,6 +239,12 @@ public class AppSettings : INotifyPropertyChanged
 
     /// <summary>上次已知的最新提交 SHA（用于"新提交"提醒）。</summary>
     public string LastSeenCommitSha { get => _lastSeenCommitSha; set => Set(ref _lastSeenCommitSha, value); }
+
+    /// <summary>定时关机：计划执行时刻（null = 未设置）。</summary>
+    public DateTime? ShutdownAt { get => _shutdownAt; set => Set(ref _shutdownAt, value); }
+
+    /// <summary>定时动作：Shutdown / Restart / Sleep。</summary>
+    public string ShutdownAction { get => _shutdownAction; set => Set(ref _shutdownAction, value); }
 
     /// <summary>首启引导是否已展示过。</summary>
     public bool OnboardingShown { get => _onboardingShown; set => Set(ref _onboardingShown, value); }
