@@ -1,35 +1,51 @@
 <Window x:Class="QuoteWidget.Views.ShutdownDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="定时关机 - 拾句" Width="380" SizeToContent="Height"
+        Title="定时关机 - 拾句" Width="420" SizeToContent="Height"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
         Background="#FAFAFC">
     <StackPanel Margin="18">
-        <TextBlock Text="到时间后执行" FontSize="13" Foreground="#44444E" Margin="0,0,0,6"/>
-        <ComboBox x:Name="ActionCombo" Width="200" HorizontalAlignment="Left" Margin="0,0,0,14" FontSize="13"/>
 
-        <TextBlock Text="定时方式" FontSize="13" Foreground="#44444E" Margin="0,0,0,6"/>
-        <RadioButton x:Name="CountdownRadio" Content="倒计时" GroupName="mode" IsChecked="True"
-                     FontSize="13" Foreground="#44444E" Margin="0,0,0,6" Cursor="Hand"/>
+        <TextBlock Text="到时间后执行" FontSize="13" Foreground="#44444E" Margin="0,0,0,6"/>
+        <ComboBox x:Name="ActionCombo" Width="200" HorizontalAlignment="Left" Margin="0,0,0,14"
+                  FontSize="13" SelectionChanged="OnInputChanged"/>
+
+        <TextBlock Text="快速设定（点击立即生效）" FontSize="13" Foreground="#44444E" Margin="0,0,0,6"/>
+        <WrapPanel x:Name="PresetPanel" Margin="0,0,0,14"/>
+
+        <TextBlock Text="或自定义时间" FontSize="13" Foreground="#44444E" Margin="0,0,0,6"/>
+        <RadioButton x:Name="CountdownRadio" Content="倒计时" GroupName="mode"
+                     FontSize="13" Foreground="#44444E" Margin="0,0,0,6" Cursor="Hand"
+                     Checked="OnModeChanged"/>
         <DockPanel Margin="22,0,0,10">
-            <TextBox x:Name="MinutesBox" Text="60" Width="70" FontSize="13"/>
+            <TextBox x:Name="MinutesBox" Text="60" Width="70" FontSize="13"
+                     TextChanged="OnInputChanged"/>
             <TextBlock Text=" 分钟后执行" FontSize="13" Foreground="#44444E" VerticalAlignment="Center"/>
         </DockPanel>
 
         <RadioButton x:Name="ClockRadio" Content="指定时刻（HH:mm，已过则顺延到明天）" GroupName="mode"
-                     FontSize="13" Foreground="#44444E" Margin="0,0,0,6" Cursor="Hand"/>
-        <DockPanel Margin="22,0,0,4">
-            <TextBox x:Name="ClockBox" Text="23:00" Width="70" FontSize="13"/>
+                     FontSize="13" Foreground="#44444E" Margin="0,0,0,6" Cursor="Hand"
+                     Checked="OnModeChanged"/>
+        <DockPanel Margin="22,0,0,10">
+            <TextBox x:Name="ClockBox" Text="23:00" Width="70" FontSize="13"
+                     TextChanged="OnInputChanged"/>
         </DockPanel>
 
-        <TextBlock x:Name="HintText" FontSize="11" Foreground="#8A8A93" TextWrapping="Wrap" Margin="0,8,0,0"/>
-        <TextBlock x:Name="StatusText" FontSize="12" Foreground="#5B7DB1" TextWrapping="Wrap" Margin="0,4,0,0"/>
+        <Border Background="#EEF4FF" CornerRadius="8" Padding="10,8" Margin="0,2,0,8">
+            <TextBlock x:Name="PreviewText" FontSize="12.5" Foreground="#2D5FAF" TextWrapping="Wrap"
+                       Text="将于 — 执行"/>
+        </Border>
+
+        <TextBlock x:Name="StatusText" FontSize="12" Foreground="#5B7DB1" TextWrapping="Wrap" Margin="0,0,0,4"/>
+        <TextBlock FontSize="11" Foreground="#8A8A93" TextWrapping="Wrap"
+                   Text="关机/重启在最后 60 秒交给 Windows 系统倒计时（有系统通知，可随时取消）；计划保存在本地，程序重启后依然生效。"/>
 
         <DockPanel Margin="0,14,0,0">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                <Button Content="取消定时" Style="{StaticResource DialogButton}" Click="OnCancelPlan" Cursor="Hand"/>
-                <Button Content="确定" Style="{StaticResource DialogButton}" Click="OnOk" Cursor="Hand"/>
                 <Button Content="关闭" Style="{StaticResource DialogButton}" Click="OnCloseClick" Cursor="Hand"/>
+                <Button Content="取消定时" Style="{StaticResource DialogButton}" Click="OnCancelPlan" Cursor="Hand"/>
+                <Button Content="设定" Style="{StaticResource DialogButton}" Click="OnOk" Cursor="Hand"
+                        IsDefault="True"/>
             </StackPanel>
         </DockPanel>
     </StackPanel>

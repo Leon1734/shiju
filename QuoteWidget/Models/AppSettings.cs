@@ -93,6 +93,9 @@ public class AppSettings : INotifyPropertyChanged
     private bool _favoriteOnlyMode;
     private DateTime? _shutdownAt;
     private string _shutdownAction = "";
+    private int _shutdownLastMinutes = 60;
+    private string _shutdownLastClock = "23:00";
+    private bool _shutdownUseClock;
     private bool _acrylicBackdrop;
     private bool _onboardingShown;
     private Dictionary<string, double[]> _windowPositions = new();
@@ -251,6 +254,11 @@ public class AppSettings : INotifyPropertyChanged
 
     /// <summary>定时动作：Shutdown / Restart / Sleep。</summary>
     public string ShutdownAction { get => _shutdownAction; set => Set(ref _shutdownAction, value); }
+
+    /// <summary>关机对话框记忆：上次倒计时分钟数 / 指定时刻 / 是否使用时刻模式。</summary>
+    public int ShutdownLastMinutes { get => _shutdownLastMinutes; set => Set(ref _shutdownLastMinutes, Math.Clamp(value, 1, 1440)); }
+    public string ShutdownLastClock { get => _shutdownLastClock; set => Set(ref _shutdownLastClock, value); }
+    public bool ShutdownUseClock { get => _shutdownUseClock; set => Set(ref _shutdownUseClock, value); }
 
     /// <summary>首启引导是否已展示过。</summary>
     public bool OnboardingShown { get => _onboardingShown; set => Set(ref _onboardingShown, value); }

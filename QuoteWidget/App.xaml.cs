@@ -99,6 +99,7 @@ public partial class App : Application
         if (e.Args.Contains("--open-settings")) ShowSettings();
         if (e.Args.Contains("--open-translate")) ShowTranslate();
         if (e.Args.Contains("--open-favorites")) ShowFavorites();
+        if (e.Args.Contains("--open-shutdown")) ShowShutdownDialog();
     }
 
     /// <summary>清理上次升级留下的缓存文件（下载包/替换脚本）。</summary>
