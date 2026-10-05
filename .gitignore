@@ -40,3 +40,7 @@ user_check.jsonzhipu.key
 QuoteWidget/tools/updatetest/app2*/
 QuoteWidget/tools/updatetest/app/
 QuoteWidget/tools/updatetest/serve/
+
+# Python 缓存
+__pycache__/
+*.pyc
