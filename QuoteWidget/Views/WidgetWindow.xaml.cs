@@ -37,6 +37,7 @@ public partial class WidgetWindow : Window
     private bool _hovering;
     private bool _dragging;
     private bool _userForcedVisible;
+    private bool _autoPaused;
     private Point _mouseDownPoint;
 
     /// <summary>当前窗口是否运行在亚克力背景模式（由 App 在重建时决定）。</summary>
@@ -100,6 +101,7 @@ public partial class WidgetWindow : Window
 
         _settingsHandler = (_, _) => ApplySettings();
         AppServices.Settings.PropertyChanged += _settingsHandler;
+        _vm.Notice += message => Dispatcher.Invoke(() => ShowToast(message));
         _favoritesHandler = () => Dispatcher.Invoke(_vm.RefreshFavorite);
         AppServices.Favorites.Changed += _favoritesHandler;
         _wallpaperHandler = () => Dispatcher.Invoke(ApplySettings);
@@ -518,10 +520,24 @@ public partial class WidgetWindow : Window
 
     // ———————— 自动换句定时器 ————————
 
+    /// <summary>暂停或继续自动换句（托盘/快捷键调用），返回暂停后的状态。</summary>
+    public bool ToggleAutoPause()
+    {
+        _autoPaused = !_autoPaused;
+        UpdateAutoTimer();
+        ShowToast(_autoPaused ? "已暂停自动换句" : "已恢复自动换句");
+        Log.Info($"auto-switch: {(_autoPaused ? "已暂停" : "已恢复")}");
+        return _autoPaused;
+    }
+
+    /// <summary>当前是否处于暂停自动换句状态。</summary>
+    public bool IsAutoPaused => _autoPaused;
+
     public void UpdateAutoTimer()
     {
         _autoTimer.Stop();
         var s = AppServices.Settings;
+        if (_autoPaused) return; // 用户手动暂停
         if (s.DailyMode) return; // 每日一句由分钟心跳负责跨零点
         if (!s.AutoSwitch || s.AutoSwitchSeconds <= 0) return;
         if (InDoNotDisturb()) return;

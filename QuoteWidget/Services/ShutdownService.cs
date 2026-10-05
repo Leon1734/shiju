@@ -120,6 +120,14 @@ public static class ShutdownService
 
         var remaining = at - DateTime.Now;
 
+        // 已过期较久（已触发过系统倒计时、或程序恢复时已过点）：清理计划并停表，避免空转
+        if (remaining <= TimeSpan.FromMinutes(-2))
+        {
+            _timer?.Stop();
+            ClearPlan();
+            return;
+        }
+
         // 5 分钟提醒（可取消）
         if (!_warnedFiveMinutes && remaining <= TimeSpan.FromMinutes(5) && remaining > TimeSpan.FromSeconds(70))
         {

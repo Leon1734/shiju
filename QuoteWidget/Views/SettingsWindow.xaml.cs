@@ -417,6 +417,7 @@ public partial class SettingsWindow : Window
         HotkeySwitchBox.Text = _settings.HotkeySwitch;
         HotkeyFavBox.Text = _settings.HotkeyFavorite;
         HotkeyToggleBox.Text = _settings.HotkeyToggle;
+        HotkeyPauseBox.Text = _settings.HotkeyPause;
     }
 
     /// <summary>快捷键录入：点击输入框后直接按组合键；Esc/退格清除。</summary>
@@ -456,6 +457,7 @@ public partial class SettingsWindow : Window
             case nameof(HotkeySwitchBox): _settings.HotkeySwitch = box.Text; break;
             case nameof(HotkeyFavBox): _settings.HotkeyFavorite = box.Text; break;
             case nameof(HotkeyToggleBox): _settings.HotkeyToggle = box.Text; break;
+            case nameof(HotkeyPauseBox): _settings.HotkeyPause = box.Text; break;
         }
     }
 

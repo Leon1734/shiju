@@ -213,6 +213,7 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="换一句" Style="{StaticResource RowLabel}"/>
                             <TextBox Grid.Row="0" Grid.Column="1" x:Name="HotkeySwitchBox" Width="150"
@@ -224,6 +225,10 @@
                                      PreviewKeyDown="HotkeyBox_PreviewKeyDown" ToolTip="点击后直接按下组合键"/>
                             <TextBlock Grid.Row="2" Grid.Column="0" Text="显示 / 隐藏" Style="{StaticResource RowLabel}"/>
                             <TextBox Grid.Row="2" Grid.Column="1" x:Name="HotkeyToggleBox" Width="150"
+                                     HorizontalAlignment="Left" Margin="0,5" FontSize="12" Cursor="Hand"
+                                     PreviewKeyDown="HotkeyBox_PreviewKeyDown" ToolTip="点击后直接按下组合键"/>
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="暂停 / 继续换句" Style="{StaticResource RowLabel}"/>
+                            <TextBox Grid.Row="3" Grid.Column="1" x:Name="HotkeyPauseBox" Width="150"
                                      HorizontalAlignment="Left" Margin="0,5" FontSize="12" Cursor="Hand"
                                      PreviewKeyDown="HotkeyBox_PreviewKeyDown" ToolTip="点击后直接按下组合键"/>
                         </Grid>
@@ -266,6 +271,8 @@
                         </Grid>
                         <CheckBox Content="联网补充「一言」随机句子" Style="{StaticResource RowCheck}"
                                   IsChecked="{Binding UseHitokoto}"/>
+                        <CheckBox Content="收藏模式：只从收藏夹出句（收藏夹为空时自动回退）"
+                                  Style="{StaticResource RowCheck}" IsChecked="{Binding FavoriteOnlyMode}"/>
                         <CheckBox Content="节日彩蛋（节日当天优先出应景句并显示角标）" Style="{StaticResource RowCheck}"
                                   IsChecked="{Binding HolidayEgg}"/>
                         <TextBlock x:Name="PoolCountText" FontSize="12" Foreground="#8A8A93" Margin="0,2,0,4"/>

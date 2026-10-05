@@ -57,6 +57,7 @@ public class AppSettings : INotifyPropertyChanged
     private string _hotkeySwitch = "Ctrl+Alt+Q";
     private string _hotkeyFavorite = "Ctrl+Alt+F";
     private string _hotkeyToggle = "Ctrl+Alt+H";
+    private string _hotkeyPause = "Ctrl+Alt+P";
 
     private bool _holidayEgg = true;
     private Dictionary<string, int> _bankSchedules = new();
@@ -89,11 +90,13 @@ public class AppSettings : INotifyPropertyChanged
     private string _lastSeenCommitSha = "";
 
     private bool _desktopOnlyWidget;
+    private bool _favoriteOnlyMode;
     private DateTime? _shutdownAt;
     private string _shutdownAction = "";
     private bool _acrylicBackdrop;
     private bool _onboardingShown;
     private Dictionary<string, double[]> _windowPositions = new();
+    private double[] _translateBounds = new double[4];
 
     private double? _windowLeft;
     private double? _windowTop;
@@ -168,6 +171,9 @@ public class AppSettings : INotifyPropertyChanged
     public string HotkeySwitch { get => _hotkeySwitch; set => Set(ref _hotkeySwitch, value); }
     public string HotkeyFavorite { get => _hotkeyFavorite; set => Set(ref _hotkeyFavorite, value); }
     public string HotkeyToggle { get => _hotkeyToggle; set => Set(ref _hotkeyToggle, value); }
+
+    /// <summary>暂停/继续自动换句快捷键。</summary>
+    public string HotkeyPause { get => _hotkeyPause; set => Set(ref _hotkeyPause, value); }
 
     /// <summary>挂件窗口位置（null = 首次启动，用默认位置）。</summary>
     public double? WindowLeft { get => _windowLeft; set => Set(ref _windowLeft, value); }
@@ -249,6 +255,12 @@ public class AppSettings : INotifyPropertyChanged
     /// <summary>首启引导是否已展示过。</summary>
     public bool OnboardingShown { get => _onboardingShown; set => Set(ref _onboardingShown, value); }
 
+    /// <summary>收藏模式：只从收藏夹里出句。</summary>
+    public bool FavoriteOnlyMode { get => _favoriteOnlyMode; set => Set(ref _favoriteOnlyMode, value); }
+
+    /// <summary>翻译小窗几何记忆 [Left, Top, Width, Height]（DIP；全 0 = 默认居中）。</summary>
+    public double[] TranslateBounds { get => _translateBounds; set => Set(ref _translateBounds, value); }
+
     /// <summary>按显示器记忆的窗口位置（显示器设备名 -> [Left, Top]，DIP）。</summary>
     public Dictionary<string, double[]> WindowPositions { get => _windowPositions; set => Set(ref _windowPositions, value); }
 
@@ -290,6 +302,8 @@ public class AppSettings : INotifyPropertyChanged
         HotkeySwitch = "Ctrl+Alt+Q";
         HotkeyFavorite = "Ctrl+Alt+F";
         HotkeyToggle = "Ctrl+Alt+H";
+        HotkeyPause = "Ctrl+Alt+P";
+        FavoriteOnlyMode = false;
 
         HolidayEgg = true;
         TranslateEngine = "Zhipu";

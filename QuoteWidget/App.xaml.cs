@@ -408,17 +408,49 @@ public partial class App : Application
                 case HotkeyService.Action.Switch: _widget?.NextQuote(forceNew: true); break;
                 case HotkeyService.Action.Favorite: _widget?.FavoriteCurrent(); break;
                 case HotkeyService.Action.Toggle: ToggleWidget(); break;
+                case HotkeyService.Action.Pause: _widget?.ToggleAutoPause(); break;
             }
         };
-        _hotkeys.Apply(AppServices.Settings);
+        ApplyHotkeys();
         AppServices.Settings.PropertyChanged += (_, args) =>
         {
+            if (_suppressHotkeyHook) return;
             if (args.PropertyName is nameof(AppSettings.HotkeySwitch)
-                or nameof(AppSettings.HotkeyFavorite) or nameof(AppSettings.HotkeyToggle))
+                or nameof(AppSettings.HotkeyFavorite) or nameof(AppSettings.HotkeyToggle)
+                or nameof(AppSettings.HotkeyPause))
             {
-                _hotkeys.Apply(AppServices.Settings);
+                ApplyHotkeys();
             }
         };
+    }
+
+    private bool _suppressHotkeyHook;
+
+    /// <summary>注册快捷键并把"自动改用备用组合"的结果写回设置，保证界面与实际情况一致。</summary>
+    private void ApplyHotkeys()
+    {
+        var changed = _hotkeys!.Apply(AppServices.Settings);
+        if (changed.Count == 0) return;
+        _suppressHotkeyHook = true;
+        try
+        {
+            foreach (var (action, combo) in changed)
+            {
+                switch (action)
+                {
+                    case HotkeyService.Action.Switch: AppServices.Settings.HotkeySwitch = combo; break;
+                    case HotkeyService.Action.Favorite: AppServices.Settings.HotkeyFavorite = combo; break;
+                    case HotkeyService.Action.Toggle: AppServices.Settings.HotkeyToggle = combo; break;
+                    case HotkeyService.Action.Pause: AppServices.Settings.HotkeyPause = combo; break;
+                }
+                Log.Info($"hotkey: {action} 已自动改用备用组合「{combo}」并写回设置");
+            }
+            SettingsStore.Save(AppServices.Settings);
+        }
+        finally
+        {
+            _suppressHotkeyHook = false;
+        }
     }
 
     private void InitTray()
@@ -468,6 +500,25 @@ public partial class App : Application
         hitokotoItem.Click += (_, _) => AppServices.Settings.UseHitokoto = hitokotoItem.Checked;
         menu.Items.Add(hitokotoItem);
 
+        var pauseItem = new WinForms.ToolStripMenuItem("暂停自动换句")
+        {
+            CheckOnClick = true
+        };
+        pauseItem.Click += (_, _) => _widget?.ToggleAutoPause();
+        menu.Items.Add(pauseItem);
+
+        var favoriteOnlyItem = new WinForms.ToolStripMenuItem("只显示收藏的句子")
+        {
+            CheckOnClick = true,
+            Checked = AppServices.Settings.FavoriteOnlyMode
+        };
+        favoriteOnlyItem.Click += (_, _) =>
+        {
+            AppServices.Settings.FavoriteOnlyMode = favoriteOnlyItem.Checked;
+            SettingsStore.Save(AppServices.Settings);
+        };
+        menu.Items.Add(favoriteOnlyItem);
+
         var desktopOnlyItem = new WinForms.ToolStripMenuItem("只在桌面显示（其它窗口在前台时隐藏）")
         {
             CheckOnClick = true,
@@ -500,6 +551,8 @@ public partial class App : Application
             autoStartItem.Checked = AppServices.Settings.AutoStart;
             hitokotoItem.Checked = AppServices.Settings.UseHitokoto;
             desktopOnlyItem.Checked = AppServices.Settings.DesktopOnlyWidget;
+            favoriteOnlyItem.Checked = AppServices.Settings.FavoriteOnlyMode;
+            pauseItem.Checked = _widget?.IsAutoPaused ?? false;
 
             shutdownCancelItem.Text = ShutdownService.IsScheduled
                 ? $"取消定时（{ShutdownService.ActionName(ShutdownService.Action)} · 剩余 {ShutdownService.RemainingText}）"

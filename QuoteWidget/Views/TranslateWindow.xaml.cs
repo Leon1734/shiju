@@ -21,6 +21,7 @@ public partial class TranslateWindow : Window
         EngineCombo.DisplayMemberPath = nameof(EngineItem.Label);
         EngineCombo.SelectedValuePath = nameof(EngineItem.Kind);
         EngineCombo.SelectedValue = AppServices.Settings.TranslateEngine;
+        RestoreBounds();
         UpdateStatus();
         InputBox.Focus();
     }
@@ -74,6 +75,39 @@ public partial class TranslateWindow : Window
     {
         if (OutputBox.Text.Length == 0) return;
         try { Clipboard.SetText(OutputBox.Text); StatusText.Text = "已复制到剪贴板。"; } catch { }
+    }
+
+    /// <summary>恢复上次的窗口位置与大小（首次打开则保持默认居中）。</summary>
+    private void RestoreBounds()
+    {
+        var bounds = AppServices.Settings.TranslateBounds;
+        if (bounds is not { Length: 4 } || bounds[2] < 380 || bounds[3] < 300) return;
+        WindowStartupLocation = WindowStartupLocation.Manual;
+        Left = bounds[0];
+        Top = bounds[1];
+        Width = bounds[2];
+        Height = bounds[3];
+
+        // 防止显示器变化后窗口跑到屏幕外
+        var vLeft = SystemParameters.VirtualScreenLeft;
+        var vTop = SystemParameters.VirtualScreenTop;
+        var vw = SystemParameters.VirtualScreenWidth;
+        var vh = SystemParameters.VirtualScreenHeight;
+        Left = Math.Clamp(Left, vLeft + 4, Math.Max(vLeft + 4, vLeft + vw - Width - 4));
+        Top = Math.Clamp(Top, vTop + 4, Math.Max(vTop + 4, vTop + vh - Height - 4));
+    }
+
+    /// <summary>关闭时保存窗口位置与大小。</summary>
+    protected override void OnClosed(EventArgs e)
+    {
+        try
+        {
+            if (WindowState == WindowState.Normal)
+                AppServices.Settings.TranslateBounds = new[] { Left, Top, Width, Height };
+            SettingsStore.Save(AppServices.Settings);
+        }
+        catch { }
+        base.OnClosed(e);
     }
 
     private void OnOpenApiSettings(object sender, RoutedEventArgs e)

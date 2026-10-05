@@ -23,6 +23,11 @@ public class WidgetViewModel : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    /// <summary>需要向用户提示的信息（由挂件窗口以气泡展示）。</summary>
+    public event Action<string>? Notice;
+
+    private void RaiseNotice(string message) => Notice?.Invoke(message);
+
     public string Text { get => _text; private set => Set(ref _text, value); }
     public string SourceDisplay { get => _sourceDisplay; private set => Set(ref _sourceDisplay, value); }
     public bool IsFavorite { get => _isFavorite; private set => Set(ref _isFavorite, value); }
@@ -99,6 +104,30 @@ public class WidgetViewModel : INotifyPropertyChanged
     /// </summary>
     public async Task<Quote?> FetchNewAsync()
     {
+        // 收藏模式：只从收藏夹出句（空收藏时自动回退并提示）
+        if (AppServices.Settings.FavoriteOnlyMode)
+        {
+            var favorites = AppServices.Favorites.Items
+                .Select(f => new Quote { Id = "fav", Text = f.Text, Source = f.Source, Category = f.Category })
+                .ToList();
+            if (favorites.Count == 0)
+            {
+                RaiseNotice("收藏夹为空，已暂时回退到全部词库");
+            }
+            else
+            {
+                var pool = favorites.Where(q => q.Text != _current?.Text && !RecentlySeen(q.Text)).ToList();
+                if (pool.Count == 0) pool = favorites.Where(q => q.Text != _current?.Text).ToList();
+                if (pool.Count == 0) pool = favorites;
+                var picked = pool[Random.Shared.Next(pool.Count)];
+                Remember(picked.Text);
+                _history.Add(picked);
+                _position = _history.Count - 1;
+                RaiseNavigation();
+                return picked;
+            }
+        }
+
         Quote? online = null;
         if (AppServices.Settings.UseHitokoto)
         {

@@ -20,7 +20,7 @@ public class HotkeyService : IDisposable
     public const uint ModAlt = 0x1, ModControl = 0x2, ModShift = 0x4, ModWin = 0x8;
     private const int WmHotkey = 0x0312;
 
-    public enum Action { Switch = 1, Favorite = 2, Toggle = 3 }
+    public enum Action { Switch = 1, Favorite = 2, Toggle = 3, Pause = 4 }
 
     private IntPtr _hwnd;
     private HwndSource? _source;
@@ -48,32 +48,58 @@ public class HotkeyService : IDisposable
         return IntPtr.Zero;
     }
 
-    /// <summary>按设置重注册全部快捷键（设置里改键后调用）。</summary>
-    public void Apply(AppSettings settings)
+    /// <summary>各动作的备用组合（首选被占用时按顺序尝试）。</summary>
+    private static readonly Dictionary<Action, string[]> Fallbacks = new()
+    {
+        [Action.Switch] = new[] { "Ctrl+Alt+Q", "Ctrl+Alt+Right", "Ctrl+Alt+1" },
+        [Action.Favorite] = new[] { "Ctrl+Alt+F", "Ctrl+Alt+2" },
+        [Action.Toggle] = new[] { "Ctrl+Alt+H", "Ctrl+Alt+3" },
+        [Action.Pause] = new[] { "Ctrl+Alt+P", "Ctrl+Alt+Space", "Ctrl+Alt+M", "Ctrl+Alt+9" },
+    };
+
+    /// <summary>按设置重注册全部快捷键；返回被自动改用的组合（动作 -> 实际生效组合）。
+    /// 当配置的组合被其他程序占用时，自动尝试备用组合并回报，避免功能静默失效。</summary>
+    public Dictionary<Action, string> Apply(AppSettings settings)
     {
         UnregisterAll();
-        TryRegister((int)Action.Switch, settings.HotkeySwitch);
-        TryRegister((int)Action.Favorite, settings.HotkeyFavorite);
-        TryRegister((int)Action.Toggle, settings.HotkeyToggle);
+        var changed = new Dictionary<Action, string>();
+        ApplyOne(Action.Switch, settings.HotkeySwitch, changed);
+        ApplyOne(Action.Favorite, settings.HotkeyFavorite, changed);
+        ApplyOne(Action.Toggle, settings.HotkeyToggle, changed);
+        ApplyOne(Action.Pause, settings.HotkeyPause, changed);
+        return changed;
     }
 
-    private void TryRegister(int id, string? text)
+    private void ApplyOne(Action action, string? configured, Dictionary<Action, string> changed)
     {
-        if (string.IsNullOrWhiteSpace(text)) return;
+        foreach (var combo in new[] { configured }.Concat(Fallbacks[action])
+                     .Where(c => !string.IsNullOrWhiteSpace(c)).Distinct())
+        {
+            if (TryRegister((int)action, combo))
+            {
+                if (combo != configured) changed[action] = combo!;
+                return;
+            }
+        }
+        Log.Warn($"hotkey: {action} 的全部候选组合都注册失败");
+    }
+
+    private bool TryRegister(int id, string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return false;
         if (!TryParse(text, out uint mods, out uint vk))
         {
             Log.Warn($"hotkey: 无法识别「{text}」，已跳过");
-            return;
+            return false;
         }
         if (RegisterHotKey(_hwnd, id, mods, vk))
         {
             _registered.Add(id);
             Log.Info($"hotkey: 已注册「{text}」-> 动作{id}");
+            return true;
         }
-        else
-        {
-            Log.Warn($"hotkey: 「{text}」注册失败（可能被其他程序占用）");
-        }
+        Log.Warn($"hotkey: 「{text}」注册失败（可能被其他程序占用）");
+        return false;
     }
 
     private void UnregisterAll()
