@@ -121,6 +121,11 @@ QuoteWidget/
 docs/img/                  # README 截图
 ```
 
+## 📋 开发文档
+
+- [开发总结与交接文档](docs/开发总结.md) —— 架构、版本履历、标准工作流、踩坑清单
+- [词库包说明](词库包/README.md) —— 词库格式与自定义方法
+
 ## 📄 License
 
 [MIT](LICENSE) © [Leon1734](https://github.com/Leon1734)
