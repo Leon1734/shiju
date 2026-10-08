@@ -564,7 +564,6 @@ public partial class App : Application
             {
                 null => "显示 / 隐藏挂件",
                 { IsVisible: true } => "隐藏挂件（当前：显示中）",
-                { IsAutoHidden: true } => "显示挂件（当前：因非桌面窗口已隐藏）",
                 _ => "显示挂件（当前：已隐藏）"
             };
         };

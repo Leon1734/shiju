@@ -24,9 +24,7 @@ public partial class WidgetWindow : Window
     private readonly DispatcherTimer _toastTimer = new();
     private readonly DispatcherTimer _typeTimer = new();
     private readonly DispatcherTimer _minuteTimer = new();
-    private readonly DispatcherTimer _desktopTimer = new();
     private DispatcherTimer? _onboardingTimer;
-    private bool _hiddenByDesktopMode;
     private DateTime _dailyDate = DateTime.Now.Date;
     private int _lastReloadHour = -1;
     private string _typeTarget = "";
@@ -76,9 +74,6 @@ public partial class WidgetWindow : Window
 
         _typeTimer.Tick += TypeTick;
 
-        // "只在桌面显示"模式：每 1.2 秒检测前台是否为桌面（其它窗口占用时隐藏，回桌面自动恢复）
-        _desktopTimer.Interval = TimeSpan.FromMilliseconds(1200);
-        _desktopTimer.Tick += (_, _) => ApplyDisplayModeTick();
 
         // 每分钟心跳：处理勿扰时段边界、每日一句跨零点、定时词库跨时段换池
         _minuteTimer.Interval = TimeSpan.FromMinutes(1);
@@ -153,7 +148,6 @@ public partial class WidgetWindow : Window
     {
         _autoTimer.Stop();
         _minuteTimer.Stop();
-        _desktopTimer.Stop();
         _toastTimer.Stop();
         _typeTimer.Stop();
         _onboardingTimer?.Stop();
@@ -173,6 +167,20 @@ public partial class WidgetWindow : Window
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
+
+    [DllImport("user32.dll")]
+    private static extern bool SetWindowPos(IntPtr hWnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
+
+    private static readonly IntPtr HwndBottom = new IntPtr(1);
+    private const uint SwpNoSize = 0x1, SwpNoMove = 0x2, SwpNoActivate = 0x10;
+
+    /// <summary>把挂件压到窗口 Z 序最底层（桌面层）：普通窗口自然遮挡，回到桌面即见。</summary>
+    private void PushToDesktopLayer()
+    {
+        var hwnd = new WindowInteropHelper(this).Handle;
+        if (hwnd == IntPtr.Zero) return;
+        SetWindowPos(hwnd, HwndBottom, 0, 0, 0, 0, SwpNoSize | SwpNoMove | SwpNoActivate);
+    }
 
     /// <summary>启用系统亚克力背景 + 系统圆角（仅 Windows 11 22H2+）。</summary>
     private void ApplyAcrylicBackdrop()
@@ -198,54 +206,23 @@ public partial class WidgetWindow : Window
 
     // ———————— 全屏自动隐藏 / 唤醒恢复 / 可见性 ————————
 
-    /// <summary>"只在桌面显示"模式：其它窗口在前台时自动隐藏，回到桌面自动恢复；
-    /// 关闭该模式时挂件始终显示在所有应用前面（默认）。</summary>
-    private void ApplyDisplayModeTick()
-    {
-        var s = AppServices.Settings;
-        if (!s.DesktopOnlyWidget)
-        {
-            if (_hiddenByDesktopMode)
-            {
-                _hiddenByDesktopMode = false;
-                Show();
-            }
-            return;
-        }
-
-        bool onDesktop = DesktopWatcher.IsDesktopForeground();
-        if (onDesktop) _userForcedVisible = false; // 回到桌面＝新一轮会话，恢复自动隐藏
-
-        if (onDesktop && _hiddenByDesktopMode)
-        {
-            _hiddenByDesktopMode = false;
-            Log.Info("desktop-mode: 回到桌面，挂件恢复显示");
-            Show();
-        }
-        else if (!onDesktop && IsVisible && !_userForcedVisible)
-        {
-            _hiddenByDesktopMode = true;
-            Log.Info($"desktop-mode: 其它窗口占用（{DesktopWatcher.DescribeForeground()}），挂件隐藏");
-            Hide();
-        }
-    }
-
-    /// <summary>设置里切换显示模式后立即生效。</summary>
+    /// <summary>
+    /// 应用显示模式：
+    /// · 始终显示（默认）：置顶浮在所有应用前面
+    /// · 只在桌面显示：挂件压到窗口最底层（Rainmeter 式桌面层）——
+    ///   普通窗口自然盖住它，回到桌面即可见；不隐藏、不轮询、不存在恢复死锁
+    /// </summary>
     public void ApplyDisplayMode()
     {
-        if (AppServices.Settings.DesktopOnlyWidget)
+        var s = AppServices.Settings;
+        if (s.DesktopOnlyWidget)
         {
-            if (!_desktopTimer.IsEnabled) _desktopTimer.Start();
-            ApplyDisplayModeTick();
+            Topmost = false;
+            PushToDesktopLayer();
         }
         else
         {
-            _desktopTimer.Stop();
-            if (_hiddenByDesktopMode)
-            {
-                _hiddenByDesktopMode = false;
-                Show();
-            }
+            Topmost = s.Topmost;
         }
     }
 
@@ -254,9 +231,6 @@ public partial class WidgetWindow : Window
     {
         _userForcedVisible = true;
     }
-
-    /// <summary>当前是否因"只在桌面显示"模式而处于自动隐藏状态。</summary>
-    public bool IsAutoHidden => _hiddenByDesktopMode;
 
     /// <summary>睡眠唤醒 / 解锁后自愈：重采样壁纸、复位动画、恢复定时。</summary>
     private void OnWakeRecover()
@@ -276,7 +250,7 @@ public partial class WidgetWindow : Window
             _vm.SetPreviewText(_vm.CurrentQuote?.Text ?? _vm.Text);
             ApplySettings();
             UpdateAutoTimer();
-            ApplyDisplayModeTick();
+            ApplyDisplayMode();
         }
         catch { }
     }
@@ -288,8 +262,8 @@ public partial class WidgetWindow : Window
         if (active)
         {
             if (!_minuteTimer.IsEnabled) _minuteTimer.Start();
-            ApplyDisplayMode();
             UpdateAutoTimer();
+            ApplyDisplayMode();
         }
         else
         {
@@ -297,7 +271,6 @@ public partial class WidgetWindow : Window
             _minuteTimer.Stop();
             _toastTimer.Stop();
             StopTypewriter();
-            // _desktopTimer 继续运行：它是自动隐藏后唯一能恢复显示的机制（勿停！）
         }
     }
 
@@ -644,9 +617,12 @@ public partial class WidgetWindow : Window
             Card.Effect = null;
         }
 
-        Topmost = s.Topmost;
+        // 显示模式：桌面层模式不置顶（让普通窗口自然遮挡），否则按置顶设置
+        Topmost = !s.DesktopOnlyWidget && s.Topmost;
+
         UpdateAutoTimer();
         ApplyFoldState();
+        ApplyDisplayMode();
     }
 
     /// <summary>多行句折叠：只显示第一行，悬停展开全文（打字机在折叠时停用）。</summary>
@@ -962,6 +938,7 @@ public partial class WidgetWindow : Window
         _dragging = false;
         SavePositionNow();
         ClampIntoScreen();
+        ApplyDisplayMode(); // 拖动会把窗口提到前层，拖完压回桌面层
     }
 
     // ———————— 按钮命令 ————————
