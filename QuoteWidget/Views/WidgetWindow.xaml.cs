@@ -24,6 +24,7 @@ public partial class WidgetWindow : Window
     private readonly DispatcherTimer _toastTimer = new();
     private readonly DispatcherTimer _typeTimer = new();
     private readonly DispatcherTimer _minuteTimer = new();
+    private readonly DispatcherTimer _desktopTimer = new();
     private DispatcherTimer? _onboardingTimer;
     private DateTime _dailyDate = DateTime.Now.Date;
     private int _lastReloadHour = -1;
@@ -73,6 +74,11 @@ public partial class WidgetWindow : Window
         };
 
         _typeTimer.Tick += TypeTick;
+
+        // "只在桌面显示"模式：周期性把挂件压回桌面层（窗口激活/拖动/弹窗都会把它顶起，必须重申钉住）
+        _desktopTimer.Interval = TimeSpan.FromMilliseconds(2500);
+        _desktopTimer.Tick += (_, _) => ReassertDesktopLayer();
+        _desktopTimer.Start();
 
 
         // 每分钟心跳：处理勿扰时段边界、每日一句跨零点、定时词库跨时段换池
@@ -219,11 +225,23 @@ public partial class WidgetWindow : Window
         {
             Topmost = false;
             PushToDesktopLayer();
+            if (!_desktopTimer.IsEnabled) _desktopTimer.Start(); // 周期重申桌面层
         }
         else
         {
             Topmost = s.Topmost;
+            _desktopTimer.Stop();
         }
+    }
+
+    /// <summary>周期重申桌面层：窗口激活/拖动/弹窗都会把挂件顶回前层，
+    /// 必须周期性压回才能维持"只在桌面显示"。用户悬停或临时置顶期间跳过，避免打断交互。</summary>
+    private void ReassertDesktopLayer()
+    {
+        if (!AppServices.Settings.DesktopOnlyWidget || !IsVisible) return;
+        if (_hovering || _switching) return;              // 用户正在交互/换句动画中
+        if (_tempTopTimer is { IsEnabled: true }) return; // 临时置顶期间
+        PushToDesktopLayer();
     }
 
     /// <summary>用户手动显示挂件：直到下次回到桌面之前不再自动隐藏。</summary>
@@ -874,6 +892,7 @@ public partial class WidgetWindow : Window
             ClampIntoScreen();
         }
         UpdateAutoTimer();
+        if (AppServices.Settings.DesktopOnlyWidget) ApplyDisplayMode(); // 交互结束立即压回桌面层
     }
 
     private void ShowControls(bool show)
