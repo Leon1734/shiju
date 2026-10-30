@@ -125,6 +125,15 @@ public partial class App : Application
         {
             await Task.Delay(TimeSpan.FromSeconds(15));
 
+            // 节流：静默检查每 6 小时一次（GitHub 匿名 API 每小时每 IP 仅 60 次，403 会静默失败）
+            if (s.LastUpdateCheckAt is { } last && DateTime.Now - last < TimeSpan.FromHours(6))
+            {
+                Log.Info($"update: 距上次检查不足 6 小时，跳过本次静默检查");
+                return;
+            }
+            s.LastUpdateCheckAt = DateTime.Now;
+            SettingsStore.Save(s);
+
             UpdateChecker.UpdateInfo? info = null;
             if (s.GitHubUpdateCheck) info = await UpdateChecker.CheckGitHubReleaseAsync(s.GitHubRepo);
             if (info == null && !string.IsNullOrWhiteSpace(s.UpdateUrl))
@@ -279,6 +288,9 @@ public partial class App : Application
     public async Task<string> CheckUpdatesInteractiveAsync()
     {
         var s = AppServices.Settings;
+
+        s.LastUpdateCheckAt = DateTime.Now; // 手动检查不受节流限制，但同样推进退避
+        SettingsStore.Save(s);
 
         UpdateChecker.UpdateInfo? info = null;
         if (s.GitHubUpdateCheck) info = await UpdateChecker.CheckGitHubReleaseAsync(s.GitHubRepo);
@@ -586,6 +598,15 @@ public partial class App : Application
     private void ToggleWidget()
     {
         if (_widget == null) return;
+
+        if (AppServices.Settings.DesktopOnlyWidget)
+        {
+            // 桌面层模式：挂件平时在最底层（被窗口自然遮挡），托盘点击=临时置顶 30 秒
+            if (_widget.IsVisible) _widget.Hide();
+            else _widget.TempRaiseForTray();
+            return;
+        }
+
         if (_widget.IsVisible)
         {
             _widget.Hide();
@@ -593,7 +614,7 @@ public partial class App : Application
         else
         {
             _widget.Show();
-            _widget.NotifyUserShown(); // 手动显示：当前全屏会话内不再被自动隐藏
+            _widget.NotifyUserShown();
         }
     }
 

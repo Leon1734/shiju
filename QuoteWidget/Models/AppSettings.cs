@@ -88,6 +88,7 @@ public class AppSettings : INotifyPropertyChanged
     private bool _gitHubUpdateCheck = true;
     private string _gitHubRepo = "Leon1734/shiju";
     private string _lastSeenCommitSha = "";
+    private DateTime? _lastUpdateCheckAt;
 
     private bool _desktopOnlyWidget;
     private bool _favoriteOnlyMode;
@@ -248,6 +249,9 @@ public class AppSettings : INotifyPropertyChanged
 
     /// <summary>上次已知的最新提交 SHA（用于"新提交"提醒）。</summary>
     public string LastSeenCommitSha { get => _lastSeenCommitSha; set => Set(ref _lastSeenCommitSha, value); }
+
+    /// <summary>上次检查更新时间（静默检查 6 小时节流；403 时同样推进以退避）。</summary>
+    public DateTime? LastUpdateCheckAt { get => _lastUpdateCheckAt; set => Set(ref _lastUpdateCheckAt, value); }
 
     /// <summary>定时关机：计划执行时刻（null = 未设置）。</summary>
     public DateTime? ShutdownAt { get => _shutdownAt; set => Set(ref _shutdownAt, value); }

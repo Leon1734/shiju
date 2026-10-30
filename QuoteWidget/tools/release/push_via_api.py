@@ -51,7 +51,7 @@ def api(method, path, token, body=None):
 
 
 def git(*args):
-    return subprocess.run(["git", "-C", REPO_ROOT, *args],
+    return subprocess.run(["git", "-C", REPO_ROOT, "-c", "core.quotepath=off", *args],
                           capture_output=True, text=True, check=True).stdout.strip()
 
 

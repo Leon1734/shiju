@@ -232,6 +232,32 @@ public partial class WidgetWindow : Window
         _userForcedVisible = true;
     }
 
+    private DispatcherTimer? _tempTopTimer;
+
+    /// <summary>桌面层模式下，临时把挂件置顶 30 秒（托盘"显示挂件"调用），
+    /// 让用户能在被窗口遮挡时看到/操作它，到时自动压回桌面层。</summary>
+    public void TempRaiseForTray()
+    {
+        Show();
+        Topmost = true;
+        Log.Info("desktop-mode: 临时置顶显示（30 秒后回到桌面层）");
+        ShowToast("已临时置顶，30 秒后回到桌面层");
+
+        _tempTopTimer ??= new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
+        _tempTopTimer.Tick -= TempTopTick;
+        _tempTopTimer.Tick += TempTopTick;
+        _tempTopTimer.Start();
+    }
+
+    private void TempTopTick(object? sender, EventArgs e)
+    {
+        _tempTopTimer?.Stop();
+        if (!AppServices.Settings.DesktopOnlyWidget) return; // 期间切回始终显示模式则保持置顶
+        Topmost = false;
+        PushToDesktopLayer();
+        Log.Info("desktop-mode: 临时置顶结束，已压回桌面层");
+    }
+
     /// <summary>睡眠唤醒 / 解锁后自愈：重采样壁纸、复位动画、恢复定时。</summary>
     private void OnWakeRecover()
     {
